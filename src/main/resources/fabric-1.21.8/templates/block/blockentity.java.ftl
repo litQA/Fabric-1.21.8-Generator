@@ -20,13 +20,19 @@
 
 <#-- @formatter:off -->
 <#include "../procedures.java.ftl">
+<#assign guiElements = w.getGElementsOfType('gui')?filter(e -> e.getModElement().getName() == data.guiBoundTo)>
+<#assign inventorySize = data.inventorySize>
+<#if guiElements?has_content>
+	<#assign guiSlots = guiElements?first.getMaxSlotID() + 1>
+	<#if guiSlots gt inventorySize><#assign inventorySize = guiSlots></#if>
+</#if>
 package ${package}.block.entity;
 
 <@javacompress>
 public class ${name}BlockEntity extends RandomizableContainerBlockEntity implements WorldlyContainer
 		<#if data.sensitiveToVibration>, GameEventListener.Provider<VibrationSystem.Listener>, VibrationSystem</#if> {
 
-	private NonNullList<ItemStack> stacks = NonNullList.withSize(${data.inventorySize}, ItemStack.EMPTY);
+	private NonNullList<ItemStack> stacks = NonNullList.withSize(${inventorySize}, ItemStack.EMPTY);
 
 	<#if data.sensitiveToVibration>
 	private final VibrationSystem.Listener vibrationListener = new VibrationSystem.Listener(this);

@@ -189,6 +189,9 @@ Legend: **Done** = implemented and statically validated; **Partial** = generic/s
   farmland, dropped/expired items, destroyed/smelted items, air clicks, hoe use and sapling growth). The 16 new
   mixins all use `require = 0` so a future Minecraft signature change degrades to a missing trigger instead of a
   startup crash. `entity_grief` and `village_siege` remain NeoForge-only.
+- P2 additions (2026.3-1.0.1-beta): all 13 `block_inv_*` procedures and the 3 entity slot/inventory procedures.
+  They use vanilla `Container` / player `Inventory` instead of NeoForge item capabilities; modded inventories that
+  expose only a NeoForge capability are not covered.
 
 ## 6. Workspace base and Gradle
 

@@ -12,7 +12,7 @@
 > - 对应的事件类扩展与 5 个 mixin（`ResultSlotMixin`、`PlayerAdvancementsMixin`、`PlayerCriticalMixin`、`FishingHookMixin`、`TamableAnimalMixin`）。
 > - P1 后续批次再补 15 个 trigger（`crop_attempts_growth`、`entity_sets_attack_target`、`entity_struck_by_lightning`、`entity_switch_hand`、`entity_uses_totem`、`explosion_occurs`、`farmland_trampled`、`gem_dropped`、`gem_expired`、`item_destroyed`、`item_smelted`、`player_left_click_air`、`player_right_click_empty_hand`、`player_use_hoe`、`sapling_glow`），并新增 `Triggers` 事件总线与 11 个 mixin。
 >
-> 当前有效覆盖约 **460/506 procedures（90.9%）**、**63/65 triggers（96.9%）**；下文的 procedure/trigger 统计已同步为 P1 后状态。
+> 当前有效覆盖约 **476/506 procedures（94.1%）**、**63/65 triggers（96.9%）**；P2 已补 13 个 `block_inv_*` 与 3 个实体槽位 procedure，下文的 procedure 统计已同步。
 
 ## 0. 结论摘要
 
@@ -20,7 +20,7 @@
 | --- | --- | --- | --- | --- | --- |
 | Mod element 类型 | 37 | 37 | 100% | 0 | — |
 | Common 基础类型 YAML | 9 | 5（名称） | 56%（名称） | 4 | 2 项有等价实现，2 项为 NeoForge data map |
-| Procedure blocks | 506 | 460 | 90.9% | 46 | 多为 NeoForge Capability / persistent data；少量可移植 |
+| Procedure blocks | 506 | 476 | 94.1% | 30 | 主要为 NeoForge Capability / persistent data |
 | Triggers | 65 | 63 | 96.9% | 2 | 仅剩 NeoForge 专属事件 |
 | AI tasks | 36 | 36 | 100% | 0 | — |
 | 变量类型 | 10 | 10 | 100% | 0 | — |
@@ -36,7 +36,7 @@
 1. **盔甲纹饰 atlas 纹理路径错误**（`templates/armortrim/trims_atlas.json.ftl` 仍使用 1.21.1 的 `trims/models/armor`）——1.21.8 与 MCreator `ArmorTrim` 都使用 `trims/entity/humanoid` / `humanoid_leggings`。此项已在 2026.3-1.0.1-beta 修正。
 2. **`itemuseanimations` 缺少 `bundle`**——1.21.8 存在 `ItemUseAnimation.BUNDLE`；已在 2026.3-1.0.1-beta 补充。
 3. **P1 已补 23 个 trigger**：前 8 个 + 后续 15 个（见上方状态说明）；仅剩 `entity_grief`、`village_siege` 两个 NeoForge 专属事件。
-4. **P1 已补 procedure**：`entity_submerged_height` 和 6 个 `item_nbt_{logic,num,text}_{get,set}`；剩余可移植项主要是 `block_inv_*`、槽位/物品处理器。
+4. **P1/P2 已补 procedure**：`entity_submerged_height`、6 个 `item_nbt_*`、13 个 `block_inv_*`、3 个实体槽位 procedure；剩余主要是 `block_nbt_*`、`entity_nbt_*`、`block_energy_*`、`block_fluidtank_*`、`itemhandler_*`。
 5. **transformable（斧头转换/去皮）块能力缺失**（26.3 data map；1.21.8 需要 `AxeItem` 映射/mixin）。
 
 > **审计修正（2026-11-03，2026.3-1.0.1-beta）**：初版报告把“盔甲纹饰 palette mcmeta”和“药水自动喷溅/滞留配方”列为 P0。复核 1.21.8 后修正：
@@ -65,7 +65,7 @@
 - `block.definition.yaml` 未声明 `transformable` 基础类型，也没有 `strippingResult` 相关模板；NeoForge 26.3 通过 `common.transformables.yaml` + `transformable` base type 支持自定义斧头转换/去皮。**Fabric 侧缺失**（1.21.8 需 `AxeItem.STRIPPABLES` 映射或 mixin）。
 - `flammable` 能力未走 `common.flammables.yaml`，但 `block.java.ftl` 使用 `FlammableBlockRegistry` 实现，**功能等价**。
 
-## 2. Procedure blocks（P1 后缺失 46 / 506）
+## 2. Procedure blocks（P2 后缺失 30 / 506）
 
 统计口径：`procedures/` 根目录 `.ftl`，排除 `_` 前缀辅助模板。
 
@@ -73,15 +73,13 @@
 | --- | --- | --- | --- | --- |
 | `block_energy_*` | 8 | can_extract / can_receive / check_extract / check_receive / extract / get / get_max / receive | **Loader-specific（N/A）** | 依赖 NeoForge `IEnergyStorage`、`Capabilities.Energy`、`ILevelExtension`；Fabric 无标准能量 API |
 | `block_fluidtank_*` | 7 | check_drain / check_fill / drain / fill / get / get_max / tanks | **Loader-specific（N/A/重设计）** | 依赖 NeoForge FluidHandler capability；Fabric 需自建 tank 抽象 |
-| `block_inv_*` | 13 | can_insert / clear_slot / damage_item / extract_items / extract_items_get_result / get_amount_inslot / get_item_inslot / get_slot_count / get_slot_stack_limit / insert_items / insert_items_get_result / remove_items / set_items | **可移植（需重设计）** | 现实现依赖 `IItemHandler`；Fabric 可用 vanilla `Container` 或 Fabric Transfer API `ItemStorage`，工作量大；上游 Fabric 2.9 未实现 |
 | `block_nbt_*` | 6 | logic_get / logic_set / num_get / num_set / text_get / text_set | **Loader-specific/重设计** | 依赖 NeoForge `BlockEntity#getPersistentData()`；Fabric 无通用 BE 持久 NBT，需 SavedData/mixin |
 | `entity_nbt_*` | 6 | logic_get / logic_set / num_get / num_set / text_get / text_set | **Loader-specific/重设计** | 依赖 `Entity#getPersistentData()`；Fabric 无等价通用持久数据 |
-| `entity_get_slot` / `entity_set_slot` / `entity_inventory_foreach` | 3 | 见左 | **可移植（需重设计）** | 依赖 NeoForge item capability；可用 `LivingEntity.getItemBySlot` / `Container` 近似实现 |
-| `itemhandler_get_slot` / `itemhandler_set_slot` | 2 | 见左 | **可移植（需重设计）** | 同上，需 Fabric Transfer API/容器抽象 |
+| `itemhandler_get_slot` / `itemhandler_set_slot` | 2 | 见左 | **可移植（需重设计）** | NeoForge item capability；1.21.8 需针对物品组件（例如 bundle contents）单独实现 |
 | `blockat_enchant_power_bonus` | 1 | 见左 | **可移植（mixin，低优先级）** | 1.21.8 无 `BlockState#getEnchantPowerBonus` 扩展点，需 mixin |
-| **合计** | **46** | | | |
+| **合计** | **30** | | | |
 
-结论：P1 已补 `item_nbt_*` 6 项和 `entity_submerged_height`；剩余 46 项中，可直接移植的仅 `blockat_enchant_power_bonus`，其余大多需要 Fabric 专属重设计。
+结论：P2 已补 13 个 `block_inv_*`（vanilla `Container`）和 3 个实体槽位 procedure；剩余 30 项中，`blockat_enchant_power_bonus` 可移植，`itemhandler_*` 需针对物品组件设计，其余是 NeoForge Capability/persistent data。
 
 ## 3. Triggers（P1 后缺失 2 / 65）
 
@@ -184,7 +182,7 @@ stepsounds 10, structures 18
 
 ### P2（需要重设计）
 
-8. `block_inv_*` / `entity_*_slot` / `itemhandler_*`（Fabric Transfer API 或 vanilla Container）。
+8. `block_inv_*` / `entity_*_slot` **已由 P2 的 vanilla Container 实现覆盖**（不支持 NeoForge 专有 capability 的模组容器）；`itemhandler_*` 仍需基于物品组件单独设计。
 9. `transformable` 块能力（`AxeItem` 映射/mixin）。
 10. `biome/material_rule` 模板。
 11. 其余 trigger 通过 Fabric 事件/mixin 补齐。
