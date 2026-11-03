@@ -1,6 +1,6 @@
 <img width="1000" alt="fabric generator banner 1 21 8" src="https://github.com/user-attachments/assets/23a3ec8a-6c23-4c8a-a659-08e63a0c1d8a" />
 
-# Fabric 1.21.8 Generator for MCreator 2026.3
+# Fabric 1.21.8 Generator
 
 Generator plugin for MCreator 2026.3.44621 EAP that produces Fabric mods for Minecraft 1.21.8.
 
