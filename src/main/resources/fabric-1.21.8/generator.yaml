@@ -1,11 +1,12 @@
 name: Fabric for @minecraft (@buildfileversion)
+version: 1.0.0-beta
 status: stable
 buildfileversion: 0.136.1
 subversion: 14
 
 import:
-  - datapack-1.21.8
-  - neoforge-1.21.8:
+  - fabric-1.21.8-base/datapack
+  - fabric-1.21.8-base/neoforge:
     exclude:
       - procedures
       - triggers

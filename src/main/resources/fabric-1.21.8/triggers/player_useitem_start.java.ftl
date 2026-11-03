@@ -1,5 +1,4 @@
 <#include "procedures.java.ftl">
-<#include "procedures.java.ftl">
 public ${name}Procedure() {
 	LivingEntityEvents.START_USE_ITEM.register((entity, itemstack) -> {
 		<#assign dependenciesCode>

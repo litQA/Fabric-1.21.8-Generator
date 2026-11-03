@@ -5,6 +5,7 @@ Generator plugin for MCreator 2026.3.44621 EAP that produces Fabric mods for Min
 | Property | Value |
 | --- | --- |
 | Generator id | `generator-fabric-1.21.8` |
+| Version | 1.0.0-beta |
 | Minecraft | 1.21.8 |
 | MCreator | 2026.3.44621 EAP (`202600344621`) |
 | Fabric Loader | 0.20.1 |
@@ -17,16 +18,68 @@ Generator plugin for MCreator 2026.3.44621 EAP that produces Fabric mods for Min
 ## Layout
 
 ```
-plugin.json
+plugin.json                     Plugin metadata (id, version 1.0.0-beta, supported MCreator versions)
 LICENSE
-fabric-1.21.8/       Fabric generator: generator.yaml, element definitions, templates, procedures, triggers
-datapack-1.21.8/     Private base layer (no generator.yaml, imported by path)
-neoforge-1.21.8/     Private base layer (no generator.yaml, imported by path)
-tools/               Static validation and packaging scripts
+README.md                       This document
+CHANGELOG.md                    Release notes
+MIGRATION-REPORT.md             Port status, 2026.3 feature status and known limitations
+FEATURE-ALIGNMENT-REPORT.md     Capability gap audit against the NeoForge 26.3 generator
+build.gradle, settings.gradle, gradle.properties, gradlew*, gradle/wrapper/
+fabric-1.21.8/                  Fabric generator: generator.yaml, definitions, templates, procedures, triggers
+fabric-1.21.8-base/datapack/    Private datapack base layer (no generator.yaml, imported by path)
+fabric-1.21.8-base/neoforge/    Private NeoForge base layer (no generator.yaml, imported by path)
+tools/                          Static validation, smoke test, workspace build and packaging scripts
 ```
 
 The two base layers are imported through `fabric-1.21.8/generator.yaml`. They intentionally have no
-`generator.yaml`, so MCreator lists only the Fabric generator.
+`generator.yaml`, so MCreator lists only the Fabric generator. Because their paths live in the
+`fabric-1.21.8-base/` namespace, they cannot collide with the `datapack-1.21.8` / `neoforge-1.21.8` paths
+of another generator plugin installed by the user.
+
+## Architecture decision: namespaced private base layers
+
+### Background
+
+The upstream Fabric generator imports the MCreator built-in `datapack-1.21.8` and `neoforge-1.21.8` generators.
+MCreator 2026.3 no longer ships a 1.21.8 built-in generator, so this plugin must carry both base layers itself.
+They are stored under `fabric-1.21.8-base/` and deliberately have no `generator.yaml`: MCreator discovers
+generators by scanning for `generator.yaml`, so only `fabric-1.21.8` appears in the generator list.
+
+### Problem
+
+MCreator resolves plugin resources by path through one global plugin classloader:
+
+- `YamlMerge.multiLoadYAML(...)` collects every plugin resource with the same path and merges them. Maps are
+  merged recursively, lists are appended (with the adaptive merge policy), and scalar values are overridden by
+  the plugin with the higher weight. `Plugin` loads higher-weight plugins first.
+- `TemplateGeneratorConfiguration` uses `ClassTemplateLoader`; a template lookup returns the first matching
+  resource across plugins, i.e. the one from the highest-weight plugin.
+- `WorkspaceGeneratorSetup.setupWorkspaceBase()` also resolves `workspacebase` resources by path across plugins.
+
+If this plugin kept the paths `datapack-1.21.8/` and `neoforge-1.21.8/`, installing another NeoForge 1.21.8
+generator would create two writers for the same paths. Depending on weight, one side's definitions, templates,
+mappings or `workspacebase` files would override or merge into the other's, causing field overrides, broken
+template references, wrong Gradle setup, or cross-contamination between workspaces of different generators.
+
+### Decision: namespace, do not merge into the Fabric generator
+
+The base layers were moved to `fabric-1.21.8-base/datapack/` and `fabric-1.21.8-base/neoforge/`, the
+`generator.yaml` imports were updated, and the plugin weight was set to 10 (the maximum recommended for a
+non-core plugin). This keeps every resource in a path owned exclusively by this plugin.
+
+Merging the two layers physically into `fabric-1.21.8/` was rejected:
+
+| Criterion | Namespace (chosen) | Merge into `fabric-1.21.8/` |
+| --- | --- | --- |
+| Change size | Rename two directories and update two import entries | Resolve duplicate files across ~1,150 base files and replicate YAML merge semantics |
+| Behaviour preservation | Exact: imports still resolve the same content | Risk of changing definition merges, template precedence and unused base files |
+| Coexistence with other generators | Complete isolation; both plugins can use their own paths | Also isolates, but only after a high-risk rewrite |
+| Maintenance | Low; paths are documented and checked by the validator/smoke test | High; every base update requires re-merging and full regression |
+
+Coexistence was verified with a synthetic NeoForge 1.21.8 generator plugin using `weight: 12` (higher than
+this plugin) and marker files under `neoforge-1.21.8/` and `datapack-1.21.8/`. Both plugins loaded, the fake
+paths resolved to the fake plugin, the `fabric-1.21.8-base/*` paths resolved to this plugin, and a Fabric block
+generated with both installed contained no fake content.
 
 ## Local commands
 
@@ -34,8 +87,11 @@ The two base layers are imported through `fabric-1.21.8/generator.yaml`. They in
 # Parse every shipped YAML definition and Freemarker template and verify template references
 pwsh plugin/tools/validate.ps1
 
-# Package build/dist/generator-fabric-1.21.8-<version>.zip
+# Package build/dist/generator-fabric-1.21.8-1.0.0-beta.zip
 pwsh plugin/tools/build-plugin.ps1
+
+# Offline smoke test: plugin load, workspace creation and code generation through MCreator 2026.3 classes
+pwsh plugin/tools/smoke-test.ps1
 
 # Build a generated workspace with Gradle caches redirected to <repo>/caches/gradle
 pwsh plugin/tools/verify-workspace.ps1 -Workspace "B:\path\to\workspace" -Tasks build
@@ -47,11 +103,12 @@ pwsh plugin/tools/verify-workspace.ps1 -Workspace "B:\path\to\workspace" -Tasks 
 ## Installation
 
 1. Run `pwsh plugin/tools/build-plugin.ps1`.
-2. Install `build/dist/generator-fabric-1.21.8-<version>.zip` through MCreator's plugin manager, or copy it to
+2. Install `build/dist/generator-fabric-1.21.8-1.0.0-beta.zip` through MCreator's plugin manager, or copy it to
    `%USERPROFILE%\.mcreator\plugins`.
 3. Create a new workspace and select **Minecraft Fabric 1.21.8 Generator**.
 
 See `MIGRATION-REPORT.md` for the full port status, implemented 2026.3 features and known limitations.
+See `FEATURE-ALIGNMENT-REPORT.md` for the capability gap audit against the built-in NeoForge 26.3 generator.
 
 ## Credits
 

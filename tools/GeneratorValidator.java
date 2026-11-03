@@ -25,7 +25,8 @@ import java.util.stream.Stream;
  */
 public class GeneratorValidator {
 
-	private static final String[] GENERATORS = { "fabric-1.21.8", "datapack-1.21.8", "neoforge-1.21.8" };
+	private static final String[] GENERATORS = { "fabric-1.21.8", "fabric-1.21.8-base/datapack",
+			"fabric-1.21.8-base/neoforge" };
 	/** Folders MCreator uses as Freemarker template roots (the editor type roots and the shared utils root). */
 	private static final String[] TEMPLATE_ROOTS = { "templates", "procedures", "triggers", "aitasks", "cmdargs",
 			"jsontriggers", "features", "enchantmenteffects", "utils" };
@@ -120,8 +121,8 @@ public class GeneratorValidator {
 		if (target.contains("${"))
 			return; // dynamic includes are resolved at render time
 		String current = rel(from);
-		String generator = current.substring(0, current.indexOf('/'));
-		String inGenerator = current.substring(generator.length() + 1);
+		String generator = generatorPath(current);
+		String inGenerator = current.equals(generator) ? "" : current.substring(generator.length() + 1);
 		String root = inGenerator.contains("/") ? inGenerator.substring(0, inGenerator.indexOf('/')) : "";
 		String currentInRoot = root.isEmpty() ? inGenerator : inGenerator.substring(root.length() + 1);
 
@@ -174,6 +175,14 @@ public class GeneratorValidator {
 			}
 		}
 		return false;
+	}
+
+	private static String generatorPath(String rel) {
+		for (String generator : GENERATORS) {
+			if (rel.equals(generator) || rel.startsWith(generator + "/"))
+				return generator;
+		}
+		return rel.contains("/") ? rel.substring(0, rel.indexOf('/')) : rel;
 	}
 
 	private static String rel(Path file) {

@@ -1,7 +1,8 @@
 # Packages the generator plugin archive consumed by MCreator.
 # The archive root contains plugin.json and LICENSE, followed by the fabric-1.21.8 generator and its
-# private datapack-1.21.8 / neoforge-1.21.8 base layers. Base layers intentionally do not contain a
-# generator.yaml, so MCreator does not list them as separate generators.
+# private fabric-1.21.8-base/{datapack,neoforge} layers. Base layers intentionally do not contain a
+# generator.yaml, so MCreator does not list them as separate generators, and their namespaced paths
+# cannot collide with other 1.21.8 generator plugins.
 
 $ErrorActionPreference = 'Stop'
 
@@ -20,12 +21,13 @@ New-Item -ItemType Directory -Force -Path $stageDir, $distDir | Out-Null
 
 Copy-Item (Join-Path $pluginRoot 'plugin.json') $stageDir
 Copy-Item (Join-Path $pluginRoot 'LICENSE') $stageDir
-foreach ($generator in @('fabric-1.21.8', 'datapack-1.21.8', 'neoforge-1.21.8')) {
+foreach ($generator in @('fabric-1.21.8', 'fabric-1.21.8-base')) {
     Copy-Item (Join-Path $resources $generator) (Join-Path $stageDir $generator) -Recurse
 }
 # The base layers are imported by path and must not be registered as standalone generators.
-Remove-Item (Join-Path $stageDir 'datapack-1.21.8/generator.yaml') -Force -ErrorAction SilentlyContinue
-Remove-Item (Join-Path $stageDir 'neoforge-1.21.8/generator.yaml') -Force -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $stageDir 'fabric-1.21.8-base/generator.yaml') -Force -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $stageDir 'fabric-1.21.8-base/datapack/generator.yaml') -Force -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $stageDir 'fabric-1.21.8-base/neoforge/generator.yaml') -Force -ErrorAction SilentlyContinue
 
 $archive = Join-Path $distDir $archiveName
 if (Test-Path $archive) { Remove-Item $archive -Force }

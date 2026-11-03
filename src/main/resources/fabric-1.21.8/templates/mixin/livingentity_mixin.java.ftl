@@ -106,5 +106,12 @@ public abstract class LivingEntityMixin {
 		if (!entity.getUseItem().isEmpty())
 			LivingEntityEvents.ENTITY_STOP_USING_ITEM.invoker().onStopUsingItem(entity, entity.getUseItem(), entity.getUseItemRemainingTicks());
 	}
+
+	@Inject(method = "completeUsingItem()V", at = @At("HEAD"), require = 0)
+	public void completeUsingItem(CallbackInfo ci) {
+		LivingEntity entity = (LivingEntity) (Object) this;
+		if (!entity.getUseItem().isEmpty())
+			LivingEntityEvents.FINISH_USING_ITEM.invoker().onFinishUsingItem(entity, entity.getUseItem().copy(), entity.getUseItemRemainingTicks());
+	}
 }
 <#-- @formatter:on -->
