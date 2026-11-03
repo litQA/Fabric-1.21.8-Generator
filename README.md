@@ -2,7 +2,7 @@
 
 # Fabric 1.21.8 Generator
 
-Generator plugin for MCreator 2026.3.44621 EAP that produces Fabric mods for Minecraft 1.21.8.
+Generator plugin for MCreator that produces Fabric mods for Minecraft 1.21.8.
 
 | Property | Value |
 | --- | --- |
