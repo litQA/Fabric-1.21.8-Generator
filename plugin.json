@@ -1,0 +1,12 @@
+{
+  "id": "generator-fabric-1.21.8",
+  "weight": 10,
+  "supportedversions": [202600344621, 202600399999],
+  "info": {
+    "name": "Minecraft Fabric 1.21.8 Generator",
+    "version": "2026.3-1.0.0-beta",
+    "description": "A Fabric 1.21.8 generator.",
+    "author": "LitQA",
+    "credits": "Goldorion, NerdyPuzzle and Spectrall."
+  }
+}
