@@ -1,0 +1,37 @@
+plugins {
+    id 'base'
+}
+
+group = 'net.mcreator.plugin'
+version = project.property('plugin_version')
+
+// The plugin archive is a plain zip: plugin.json and LICENSE at the archive root plus the generator
+// definitions in the fabric-1.21.8 directory. The datapack-1.21.8 and neoforge-1.21.8 directories are
+// private base layers imported by fabric-1.21.8/generator.yaml; they deliberately have no generator.yaml,
+// so MCreator does not list them as separate generators.
+tasks.register('pluginZip', Zip) {
+    group = 'build'
+    description = 'Packages the generator plugin archive expected by MCreator.'
+
+    archiveFileName = "generator-fabric-1.21.8-${project.version}.zip"
+    destinationDirectory = layout.buildDirectory.dir('dist')
+
+    from('plugin.json')
+    from('LICENSE')
+    from('src/main/resources') {
+        include 'fabric-1.21.8/**'
+        include 'datapack-1.21.8/**'
+        include 'neoforge-1.21.8/**'
+    }
+}
+
+tasks.named('build') {
+    dependsOn 'pluginZip'
+}
+
+tasks.register('printPluginArchive') {
+    dependsOn 'pluginZip'
+    doLast {
+        println "Plugin archive: ${tasks.named('pluginZip').get().archiveFile.get().asFile}"
+    }
+}

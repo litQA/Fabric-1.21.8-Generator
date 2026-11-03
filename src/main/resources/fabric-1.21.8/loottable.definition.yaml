@@ -1,0 +1,8 @@
+templates:
+  - template: loottable.json.ftl # loaded from datapack generator
+    writer: json
+    name: "@RESROOT/data/@[getNamespace()]/loot_table/@[getName()].json"
+
+# Global loot modifiers are a NeoForge data map feature. Fabric implements loot table changes through
+# LootTableEvents, which is not wired into this generator yet, so the fields are hidden.
+field_exclusions: [ lootTableToModify, addLootModifier, lootModifierPriority, lootModifierConditions ]
