@@ -15,8 +15,7 @@ $buildDir = Join-Path $pluginRoot 'build/smoke'
 
 if (-not (Test-Path (Join-Path $MCreatorPath 'mcreator.exe'))) { throw "MCreator not found at $MCreatorPath" }
 if ([string]::IsNullOrWhiteSpace($PluginZip)) {
-    $PluginZip = Get-ChildItem (Join-Path $pluginRoot 'build/dist') -Filter 'generator-fabric-1.21.8-*.zip' |
-        Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
+    $PluginZip = Join-Path $pluginRoot 'build/dist/generator-fabric-1.21.8.zip'
 }
 if (-not $PluginZip -or -not (Test-Path $PluginZip)) { throw 'Plugin archive not found. Run build-plugin.ps1 first.' }
 

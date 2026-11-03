@@ -33,6 +33,8 @@
 
 package ${package}.mixin;
 
+import ${package}.trigger.${JavaModName}Triggers;
+
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
     @Shadow
@@ -124,6 +126,22 @@ public abstract class LivingEntityMixin {
 	@Inject(method = "tick()V", at = @At("TAIL"), require = 0)
 	public void tick(CallbackInfo ci) {
 		LivingEntityEvents.END_ENTITY_TICK.invoker().onEndTick((LivingEntity) (Object) this);
+	}
+
+	@Inject(method = "setItemInHand(Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;)V", at = @At("HEAD"), require = 0)
+	public void setItemInHand(InteractionHand hand, ItemStack stack, CallbackInfo ci) {
+		if (hand == InteractionHand.OFF_HAND) {
+			LivingEntity entity = (LivingEntity) (Object) this;
+			${JavaModName}Triggers.fireSwitchHand(entity, entity.getMainHandItem().copy(), stack.copy());
+		}
+	}
+
+	@Inject(method = "checkTotemDeathProtection", at = @At("RETURN"), require = 0)
+	public void checkTotemDeathProtection(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
+		if (cir.getReturnValueZ()) {
+			LivingEntity entity = (LivingEntity) (Object) this;
+			${JavaModName}Triggers.fireUseTotem(entity, source, entity.getOffhandItem().copy());
+		}
 	}
 }
 <#-- @formatter:on -->

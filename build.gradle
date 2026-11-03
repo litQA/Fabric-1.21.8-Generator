@@ -14,7 +14,7 @@ tasks.register('pluginZip', Zip) {
     group = 'build'
     description = 'Packages the generator plugin archive expected by MCreator.'
 
-    archiveFileName = "generator-fabric-1.21.8-${project.version}.zip"
+    archiveFileName = "generator-fabric-1.21.8.zip"
     destinationDirectory = layout.buildDirectory.dir('dist')
 
     from('plugin.json')

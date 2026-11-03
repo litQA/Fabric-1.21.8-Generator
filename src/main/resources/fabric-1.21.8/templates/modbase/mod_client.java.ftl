@@ -21,6 +21,8 @@ package ${package};
 
 @Environment(EnvType.CLIENT) public class ${JavaModName}Client implements ClientModInitializer {
 
+	private boolean mcreatorUseKeyPressed;
+
 	@Override
 	public void onInitializeClient() {
 		// Start of user code block mod constructor
@@ -45,6 +47,14 @@ package ${package};
 		<#if w.getGElementsOfType("command")?filter(e -> e.type == "CLIENTSIDE")?size != 0>${JavaModName}Commands.clientLoad();</#if>
 		<#if types.keybinds?has_content>${JavaModName}KeyMappings.clientLoad();</#if>
 		</@javacompress>
+
+		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			boolean pressed = client.options.keyUse.isDown();
+			if (pressed && !this.mcreatorUseKeyPressed && client.screen == null && client.player != null
+					&& client.player.getMainHandItem().isEmpty())
+				ClientPlayNetworking.send(new ${package}.trigger.ClientTriggerPayload((byte) 1));
+			this.mcreatorUseKeyPressed = pressed;
+		});
 
 		<#if w.hasVariablesOfScope("GLOBAL_WORLD") || w.hasVariablesOfScope("GLOBAL_MAP")>
 			ClientPlayNetworking.registerGlobalReceiver(${JavaModName}Variables.SavedDataSyncMessage.TYPE, ${JavaModName}Variables.SavedDataSyncMessage::handleData);

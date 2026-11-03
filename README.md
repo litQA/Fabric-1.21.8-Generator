@@ -83,18 +83,20 @@ generated with both installed contained no fake content.
 
 ## Local commands
 
+Run these from the repository root:
+
 ```powershell
 # Parse every shipped YAML definition and Freemarker template and verify template references
-pwsh plugin/tools/validate.ps1
+pwsh .\plugin\tools\validate.ps1
 
-# Package build/dist/generator-fabric-1.21.8-2026.3-1.0.1-beta.zip
-pwsh plugin/tools/build-plugin.ps1
+# Package plugin\build\dist\generator-fabric-1.21.8.zip
+pwsh .\plugin\tools\build-plugin.ps1
 
 # Offline smoke test: plugin load, workspace creation and code generation through MCreator 2026.3 classes
-pwsh plugin/tools/smoke-test.ps1
+pwsh .\plugin\tools\smoke-test.ps1
 
 # Build a generated workspace with Gradle caches redirected to <repo>/caches/gradle
-pwsh plugin/tools/verify-workspace.ps1 -Workspace "B:\path\to\workspace" -Tasks build
+pwsh .\plugin\tools\verify-workspace.ps1 -Workspace "B:\path\to\workspace" -Tasks build
 ```
 
 `validate.ps1` needs the MCreator EAP installation for its JDK and the Freemarker / SnakeYAML libraries. Pass
@@ -102,9 +104,11 @@ pwsh plugin/tools/verify-workspace.ps1 -Workspace "B:\path\to\workspace" -Tasks 
 
 ## Installation
 
-1. Run `pwsh plugin/tools/build-plugin.ps1`.
-2. Install `build/dist/generator-fabric-1.21.8-2026.3-1.0.1-beta.zip` through MCreator's plugin manager, or copy it to
-   `%USERPROFILE%\.mcreator\plugins`.
+1. Run `pwsh .\plugin\tools\build-plugin.ps1`.
+2. Install `plugin\build\dist\generator-fabric-1.21.8.zip` through MCreator's plugin manager, or copy it directly:
+   ```powershell
+   Copy-Item .\plugin\build\dist\generator-fabric-1.21.8.zip "$env:USERPROFILE\.mcreator\plugins" -Force
+   ```
 3. Create a new workspace and select **Minecraft Fabric 1.21.8 Generator**.
 
 See `MIGRATION-REPORT.md` for the full port status, implemented 2026.3 features and known limitations.

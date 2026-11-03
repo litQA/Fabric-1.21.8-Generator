@@ -123,6 +123,21 @@ public class SmokeTest {
 		addTriggerProcedure(workspace, "TestEntityTicks", "test_entity_ticks", "entity_ticks");
 		addTriggerProcedure(workspace, "TestEquipmentChange", "test_equipment_change", "entity_change_equipment");
 		addTriggerProcedure(workspace, "TestModLoad", "test_mod_load", "mod_load");
+		addTriggerProcedure(workspace, "TestCropGrowth", "test_crop_growth", "crop_attempts_growth");
+		addTriggerProcedure(workspace, "TestAttackTarget", "test_attack_target", "entity_sets_attack_target");
+		addTriggerProcedure(workspace, "TestLightning", "test_lightning", "entity_struck_by_lightning");
+		addTriggerProcedure(workspace, "TestSwitchHand", "test_switch_hand", "entity_switch_hand");
+		addTriggerProcedure(workspace, "TestTotem", "test_totem", "entity_uses_totem");
+		addTriggerProcedure(workspace, "TestExplosion", "test_explosion", "explosion_occurs");
+		addTriggerProcedure(workspace, "TestFarmland", "test_farmland", "farmland_trampled");
+		addTriggerProcedure(workspace, "TestGemDropped", "test_gem_dropped", "gem_dropped");
+		addTriggerProcedure(workspace, "TestGemExpired", "test_gem_expired", "gem_expired");
+		addTriggerProcedure(workspace, "TestItemDestroyed", "test_item_destroyed", "item_destroyed");
+		addTriggerProcedure(workspace, "TestItemSmelted", "test_item_smelted", "item_smelted");
+		addTriggerProcedure(workspace, "TestLeftClickAir", "test_left_click_air", "player_left_click_air");
+		addTriggerProcedure(workspace, "TestRightClickEmpty", "test_right_click_empty", "player_right_click_empty_hand");
+		addTriggerProcedure(workspace, "TestUseHoe", "test_use_hoe", "player_use_hoe");
+		addTriggerProcedure(workspace, "TestSaplingGlow", "test_sapling_glow", "sapling_glow");
 
 		TemplateGenerator templateGenerator = generator.getTemplateGeneratorFromName("templates");
 		for (GeneratorTemplate template : generator.getModBaseGeneratorTemplatesList()) {
@@ -172,7 +187,11 @@ public class SmokeTest {
 		check(new File(procedures, "TestItemCraftedProcedure.java").isFile()
 				&& new File(procedures, "TestEntityTicksProcedure.java").isFile()
 				&& new File(procedures, "TestEquipmentChangeProcedure.java").isFile()
-				&& new File(procedures, "TestModLoadProcedure.java").isFile(),
+				&& new File(procedures, "TestModLoadProcedure.java").isFile()
+				&& new File(procedures, "TestCropGrowthProcedure.java").isFile()
+				&& new File(procedures, "TestSwitchHandProcedure.java").isFile()
+				&& new File(procedures, "TestExplosionProcedure.java").isFile()
+				&& new File(procedures, "TestSaplingGlowProcedure.java").isFile(),
 				"P1 trigger procedures written");
 
 		if (!failures.isEmpty()) {

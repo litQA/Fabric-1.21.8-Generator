@@ -28,6 +28,17 @@
 <#assign mixins = mixins + ['PlayerCriticalMixin']>
 <#assign mixins = mixins + ['FishingHookMixin']>
 <#assign mixins = mixins + ['TamableAnimalMixin']>
+<#assign mixins = mixins + ['CropGrowthMixin']>
+<#assign mixins = mixins + ['EntityThunderMixin']>
+<#assign mixins = mixins + ['ExplosionMixin']>
+<#assign mixins = mixins + ['FarmBlockMixin']>
+<#assign mixins = mixins + ['FurnaceResultSlotMixin']>
+<#assign mixins = mixins + ['HoeItemMixin']>
+<#assign mixins = mixins + ['ItemEntityMixin']>
+<#assign mixins = mixins + ['MobMixin']>
+<#assign mixins = mixins + ['SaplingGrowthMixin']>
+<#assign mixins = mixins + ['PlayerEventsMixin']>
+<#assign mixins = mixins + ['ServerGamePacketListenerImplMixin']>
 {
   "required": true,
   "package": "${package}.mixin",

@@ -10,8 +10,9 @@
 > - 8 个 trigger：`entity_change_equipment`、`entity_ticks`、`entity_tamed`、`item_crafted`、`mod_load`、`player_completes_advancement`、`player_critical_hit`、`player_fishes_item`；
 > - 7 个 procedure：`entity_submerged_height` + `item_nbt_{logic,num,text}_{get,set}`；
 > - 对应的事件类扩展与 5 个 mixin（`ResultSlotMixin`、`PlayerAdvancementsMixin`、`PlayerCriticalMixin`、`FishingHookMixin`、`TamableAnimalMixin`）。
+> - P1 后续批次再补 15 个 trigger（`crop_attempts_growth`、`entity_sets_attack_target`、`entity_struck_by_lightning`、`entity_switch_hand`、`entity_uses_totem`、`explosion_occurs`、`farmland_trampled`、`gem_dropped`、`gem_expired`、`item_destroyed`、`item_smelted`、`player_left_click_air`、`player_right_click_empty_hand`、`player_use_hoe`、`sapling_glow`），并新增 `Triggers` 事件总线与 11 个 mixin。
 >
-> 当前有效覆盖约 **460/506 procedures（90.9%）**、**48/65 triggers（73.8%）**；下文的 procedure/trigger 统计已同步为 P1 后状态。
+> 当前有效覆盖约 **460/506 procedures（90.9%）**、**63/65 triggers（96.9%）**；下文的 procedure/trigger 统计已同步为 P1 后状态。
 
 ## 0. 结论摘要
 
@@ -20,7 +21,7 @@
 | Mod element 类型 | 37 | 37 | 100% | 0 | — |
 | Common 基础类型 YAML | 9 | 5（名称） | 56%（名称） | 4 | 2 项有等价实现，2 项为 NeoForge data map |
 | Procedure blocks | 506 | 460 | 90.9% | 46 | 多为 NeoForge Capability / persistent data；少量可移植 |
-| Triggers | 65 | 48 | 73.8% | 17 | 其余需新 Fabric 事件/mixin |
+| Triggers | 65 | 63 | 96.9% | 2 | 仅剩 NeoForge 专属事件 |
 | AI tasks | 36 | 36 | 100% | 0 | — |
 | 变量类型 | 10 | 10 | 100% | 0 | — |
 | Command arguments | 12 | 12 | 100% | 0 | — |
@@ -34,7 +35,7 @@
 
 1. **盔甲纹饰 atlas 纹理路径错误**（`templates/armortrim/trims_atlas.json.ftl` 仍使用 1.21.1 的 `trims/models/armor`）——1.21.8 与 MCreator `ArmorTrim` 都使用 `trims/entity/humanoid` / `humanoid_leggings`。此项已在 2026.3-1.0.1-beta 修正。
 2. **`itemuseanimations` 缺少 `bundle`**——1.21.8 存在 `ItemUseAnimation.BUNDLE`；已在 2026.3-1.0.1-beta 补充。
-3. **P1 已补 8 个 trigger**：`entity_change_equipment`、`entity_ticks`、`entity_tamed`、`item_crafted`、`mod_load`、`player_completes_advancement`、`player_critical_hit`、`player_fishes_item`；剩余 17 个需新事件/mixin。
+3. **P1 已补 23 个 trigger**：前 8 个 + 后续 15 个（见上方状态说明）；仅剩 `entity_grief`、`village_siege` 两个 NeoForge 专属事件。
 4. **P1 已补 procedure**：`entity_submerged_height` 和 6 个 `item_nbt_{logic,num,text}_{get,set}`；剩余可移植项主要是 `block_inv_*`、槽位/物品处理器。
 5. **transformable（斧头转换/去皮）块能力缺失**（26.3 data map；1.21.8 需要 `AxeItem` 映射/mixin）。
 
@@ -82,16 +83,16 @@
 
 结论：P1 已补 `item_nbt_*` 6 项和 `entity_submerged_height`；剩余 46 项中，可直接移植的仅 `blockat_enchant_power_bonus`，其余大多需要 Fabric 专属重设计。
 
-## 3. Triggers（P1 后缺失 17 / 65）
+## 3. Triggers（P1 后缺失 2 / 65）
 
-P1 已实现 8 个 trigger：`entity_change_equipment`、`entity_ticks`、`entity_tamed`、`item_crafted`、`mod_load`、`player_completes_advancement`、`player_critical_hit`、`player_fishes_item`。剩余 17 个：
+P1 已实现 23 个 trigger：前 8 个（`entity_change_equipment`、`entity_ticks`、`entity_tamed`、`item_crafted`、`mod_load`、`player_completes_advancement`、`player_critical_hit`、`player_fishes_item`）加后续 15 个（见开头状态说明）。剩余 2 个：
 
-| 分类 | 数量 | Trigger | 判定 |
-| --- | --- | --- | --- |
-| 可由 vanilla 事件/mixin 实现 | 13 | `entity_switch_hand`, `entity_sets_attack_target`, `entity_struck_by_lightning`, `entity_uses_totem`, `item_destroyed`, `item_smelted`, `farmland_trampled`, `crop_attempts_growth`, `sapling_glow`, `gem_dropped`, `gem_expired`, `player_left_click_air`, `player_use_hoe` | 可移植（需新 mixin/事件，P2） |
-| 需要较深 mixin/自定义语义 | 4 | `entity_grief`, `village_siege`, `explosion_occurs`, `player_right_click_empty_hand` | 可移植但高风险（P3） |
+| Trigger | 判定 |
+| --- | --- |
+| `entity_grief` | NeoForge `EntityMobGriefingEvent` 专属；1.21.8 无通用“生物破坏方块前”事件，需要按具体 AI/方块路径分别注入，暂不实现 |
+| `village_siege` | NeoForge `VillageSiegeEvent` 专属；1.21.8 `VillageSiege` 没有可稳定映射的玩家/尝试生成坐标事件点，暂不实现 |
 
-说明：17 项全部有 1.21.8 对应机制，不存在“26.3 独有、1.21.8 无法实现”的 trigger；剩余项在 Blockly 中仍不可用。
+说明：其余 63 个 trigger 已可在 Blockly 中选择并生成。
 
 ## 4. 其他生成器能力
 
@@ -178,7 +179,7 @@ stepsounds 10, structures 18
 
 4. 移植 `entity_submerged_height`（上游 Fabric 2.9 已有）。
 5. 移植 `entity_change_equipment`、`entity_ticks` trigger（上游 Fabric 2.9 已有）。
-6. 常见 trigger：`item_crafted`、`player_completes_advancement`、`player_critical_hit`、`player_fishes_item`、`mod_load`、`entity_tamed`。
+6. 常见 trigger：`item_crafted`、`player_completes_advancement`、`player_critical_hit`、`player_fishes_item`、`mod_load`、`entity_tamed`；后续批次补齐其余 15 个可移植 trigger。
 7. `item_nbt_*` 6 个 procedure block（`DataComponents.CUSTOM_DATA`）。
 
 ### P2（需要重设计）

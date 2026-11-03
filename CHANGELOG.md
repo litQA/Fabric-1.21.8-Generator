@@ -4,6 +4,7 @@
 
 ### New Content
 - P1 trigger support: `entity_change_equipment`, `entity_ticks`, `entity_tamed`, `item_crafted`, `mod_load`, `player_completes_advancement`, `player_critical_hit` and `player_fishes_item`, backed by new generated events and mixins (`ResultSlotMixin`, `PlayerAdvancementsMixin`, `PlayerCriticalMixin`, `FishingHookMixin`, `TamableAnimalMixin`) plus the `LivingEntityMixin` equipment/tick hooks.
+- P1 second batch: 15 more triggers (`crop_attempts_growth`, `entity_sets_attack_target`, `entity_struck_by_lightning`, `entity_switch_hand`, `entity_uses_totem`, `explosion_occurs`, `farmland_trampled`, `gem_dropped`, `gem_expired`, `item_destroyed`, `item_smelted`, `player_left_click_air`, `player_right_click_empty_hand`, `player_use_hoe`, `sapling_glow`) backed by a generated `Triggers` event bus and 11 additional mixins. `entity_grief` and `village_siege` remain NeoForge-only events.
 - `entity_submerged_height` procedure block and the six `item_nbt_*` logic/number/text get/set blocks, using 1.21.8 `FluidTags` and `DataComponents.CUSTOM_DATA`.
 
 ### Changes
@@ -11,9 +12,13 @@
 - Capability audit corrections: 1.21.8 already registers generic POTION + gunpowder -> splash and splash + dragon's breath -> lingering brewing mixes, so no per-potion recipe generation is required; the 26.3 `trim_palette.mcmeta` output is part of the 26.3 equipment pipeline and has no 1.21.8 counterpart.
 
 ### Fixes
-Fixed 2 bug(s).
+Fixed 6 bug(s).
 - Armor trim atlas textures were referenced at the pre-1.21.2 `trims/models/armor` paths; the generated atlas now uses `trims/entity/humanoid` and `trims/entity/humanoid_leggings`, matching 1.21.8 and the MCreator `ArmorTrim` texture copy paths.
 - The item use animation mapping was missing `bundle`, which is a valid `ItemUseAnimation` value in 1.21.8.
+- The generated client used `Options.useKey.isPressed()`; 1.21.8 exposes `Options.keyUse.isDown()`.
+- `gem_dropped` now hooks `ServerPlayer.drop(ItemStack, boolean, boolean)`, so pressing Q in the inventory triggers it on the server.
+- `sapling_glow` now fires only after `TreeGrower.growTree` returns `true` and the sapling block has been replaced, avoiding bone-meal false positives.
+- `player_left_click_air` now fires from the serverbound `handleAnimate` handler (with a MISS raycast check), and `player_right_click_empty_hand` is forwarded from the client tick to a small serverbound payload, so procedures that use server-side blocks (for example the chat message block) execute correctly.
 
 ## 1.0.0-beta
 

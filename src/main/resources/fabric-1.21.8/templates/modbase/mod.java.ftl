@@ -65,6 +65,7 @@ public class ${JavaModName} implements ModInitializer {
 		<#if types.gamerules?has_content>${JavaModName}GameRules.load();</#if>
 		<#if w.getGElementsOfType("command")?filter(e -> e.type != "CLIENTSIDE")?size != 0>${JavaModName}Commands.load();</#if>
 		<#if w.getGElementsOfType('procedure')?filter(e -> !e.procedurexml?contains('no_ext_trigger'))?size != 0>${JavaModName}Procedures.load();</#if>
+		${package}.trigger.${JavaModName}TriggerNetworking.register();
 		<#if types.keybinds?has_content>${JavaModName}KeyMappingsServer.serverLoad();</#if>
 		</@javacompress>
 

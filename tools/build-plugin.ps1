@@ -12,9 +12,7 @@ $buildDir = Join-Path $pluginRoot 'build'
 $stageDir = Join-Path $buildDir 'plugin-stage'
 $distDir = Join-Path $buildDir 'dist'
 
-$pluginJson = Get-Content (Join-Path $pluginRoot 'plugin.json') -Raw | ConvertFrom-Json
-$version = $pluginJson.info.version
-$archiveName = "generator-fabric-1.21.8-$version.zip"
+$archiveName = "generator-fabric-1.21.8.zip"
 
 if (Test-Path $stageDir) { Remove-Item $stageDir -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $stageDir, $distDir | Out-Null

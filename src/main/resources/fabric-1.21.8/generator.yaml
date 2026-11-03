@@ -155,6 +155,39 @@ base_templates:
   - template: mixin/tamableanimal_mixin.java.ftl
     writer: java
     name: "@SRCROOT/@BASEPACKAGEPATH/mixin/TamableAnimalMixin.java"
+  - template: mixin/cropgrowth_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/CropGrowthMixin.java"
+  - template: mixin/entitythunder_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/EntityThunderMixin.java"
+  - template: mixin/explosion_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/ExplosionMixin.java"
+  - template: mixin/farmblock_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/FarmBlockMixin.java"
+  - template: mixin/furnaceresultslot_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/FurnaceResultSlotMixin.java"
+  - template: mixin/hoeitem_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/HoeItemMixin.java"
+  - template: mixin/itementity_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/ItemEntityMixin.java"
+  - template: mixin/mob_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/MobMixin.java"
+  - template: mixin/saplinggrowth_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/SaplingGrowthMixin.java"
+  - template: mixin/playerevents_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/PlayerEventsMixin.java"
+  - template: mixin/servergamepacketlistenerimpl_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/ServerGamePacketListenerImplMixin.java"
 
 # Custom events
   - template: event/livingentity_events.java.ftl
@@ -172,6 +205,15 @@ base_templates:
   - template: event/misc_events.java.ftl
     writer: java
     name: "@SRCROOT/@BASEPACKAGEPATH/event/MiscEvents.java"
+  - template: modbase/triggersupport.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/trigger/@JavaModNameTriggers.java"
+  - template: modbase/clienttriggerpayload.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/trigger/ClientTriggerPayload.java"
+  - template: modbase/trigger_networking.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/trigger/@JavaModNameTriggerNetworking.java"
 
 
 java_models:

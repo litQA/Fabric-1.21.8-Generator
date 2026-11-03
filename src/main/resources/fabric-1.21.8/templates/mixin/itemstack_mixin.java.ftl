@@ -18,6 +18,8 @@
 <#-- @formatter:off -->
 package ${package}.mixin;
 
+import ${package}.trigger.${JavaModName}Triggers;
+
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
 	@Inject(method = "useOn(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;", at = @At("TAIL"), cancellable = true)
@@ -30,6 +32,13 @@ public abstract class ItemStackMixin {
 			if (!result)
 				cir.setReturnValue(InteractionResult.FAIL);
 		}
+	}
+
+	@Inject(method = "hurtAndBreak(ILnet/minecraft/server/level/ServerLevel;Lnet/minecraft/server/level/ServerPlayer;Ljava/util/function/Consumer;)V", at = @At("RETURN"), require = 0)
+	public void hurtAndBreak(int amount, ServerLevel level, ServerPlayer player, java.util.function.Consumer<Item> onBroken, CallbackInfo ci) {
+		ItemStack stack = (ItemStack) (Object) this;
+		if (stack.getCount() <= 0)
+			${JavaModName}Triggers.fireItemDestroyed(player, stack);
 	}
 }
 <#-- @formatter:on -->
