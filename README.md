@@ -1,3 +1,5 @@
+<img width="1000" alt="fabric generator banner 1 21 8" src="https://github.com/user-attachments/assets/23a3ec8a-6c23-4c8a-a659-08e63a0c1d8a" />
+
 # Fabric 1.21.8 Generator for MCreator 2026.3
 
 Generator plugin for MCreator 2026.3.44621 EAP that produces Fabric mods for Minecraft 1.21.8.
@@ -5,13 +7,11 @@ Generator plugin for MCreator 2026.3.44621 EAP that produces Fabric mods for Min
 | Property | Value |
 | --- | --- |
 | Generator id | `generator-fabric-1.21.8` |
-| Version | 2026.3-1.0.1-beta |
 | Minecraft | 1.21.8 |
-| MCreator | 2026.3.44621 EAP (`202600344621`) |
 | Fabric Loader | 0.20.1 |
 | Fabric API | 0.136.1+1.21.8 |
 | Java | 25 toolchain, 21 bytecode |
-| Gradle | 9.8.0 (local distribution) |
+| Gradle | 9.8.0 |
 | Author | LitQA |
 | License | CC BY-NC 4.0 |
 
@@ -110,10 +110,22 @@ pwsh plugin/tools/verify-workspace.ps1 -Workspace "B:\path\to\workspace" -Tasks 
 See `MIGRATION-REPORT.md` for the full port status, implemented 2026.3 features and known limitations.
 See `FEATURE-ALIGNMENT-REPORT.md` for the capability gap audit against the built-in NeoForge 26.3 generator.
 
+## DSH Empowers Accelerated Plugin Development
+
+<img width="1000" alt="dsh" src="https://github.com/user-attachments/assets/1b0b22c9-5213-48eb-9e51-6de70e852dec" />
+
+This project includes code generated with **DSH (AI)** assistance.
+
 ## Credits
 
 Generator architecture based on the MCreator NeoForge 1.21.8 generator. Fabric implementation derived from the
 [Fabric-Generator-MCreator](https://github.com/Goldorion/Fabric-Generator-MCreator) project by Goldorion,
 NerdyPuzzle and Spectrall.
 
-This project is not official. It is not affiliated with Fabric, Minecraft, MCreator or their maintainers.
+# MCreator - Minecraft Mod Maker
+
+[![MCreator](https://mcreator.net/image/brand/mcreator300s.png)](https://mcreator.net/)
+
+MCreator is an open-source software used to make Minecraft Java Edition mods, Minecraft Bedrock Edition Add-Ons, resource packs, and data packs using an intuitive easy-to-learn interface or with an integrated code editor. It is used worldwide by Minecraft players, aspiring mod developers, for education, online classes, and STEM workshops. 
+
+NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.
