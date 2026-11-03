@@ -183,6 +183,11 @@ Legend: **Done** = implemented and statically validated; **Partial** = generic/s
 - Tabs: `hideTitle` support.
 - New procedures and AI tasks listed in section 4 were added under `fabric-1.21.8/procedures` and
   `fabric-1.21.8/aitasks`.
+- P1 additions (2026.3-1.0.1-beta): `entity_submerged_height`, six `item_nbt_*` blocks, and eight triggers
+  (`entity_change_equipment`, `entity_ticks`, `entity_tamed`, `item_crafted`, `mod_load`,
+  `player_completes_advancement`, `player_critical_hit`, `player_fishes_item`). The triggers use generated
+  `LivingEntityEvents`/`ItemEvents`/`PlayerEvents` events and five additional mixins; the mixins use
+  `require = 0` so a future Minecraft signature change degrades to a missing trigger instead of a startup crash.
 
 ## 6. Workspace base and Gradle
 
@@ -216,15 +221,16 @@ procedure from the fixtures in `workspace/test-min/elements`. Result of the run 
   ok   definitions loaded: 37
   ok   armor trim definition present
   ok   workspace created with the Fabric generator
-  ok   base templates rendered: 25
+  ok   base templates rendered: 30
   ok   mod base class written
   ok   mixin configuration written
   ok   armor trim atlas written
   ok   armor trim atlas uses 1.21.8 texture paths
-  ok   element files generated: 12
+  ok   element files generated: 20
   ok   block class written
   ok   item class written
   ok   procedure class written
+  ok   P1 trigger procedures written
 SMOKE TEST PASSED
 ```
 

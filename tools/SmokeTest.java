@@ -5,6 +5,7 @@ import net.mcreator.element.ModElementType;
 import net.mcreator.element.ModElementTypeLoader;
 import net.mcreator.element.parts.MItemBlock;
 import net.mcreator.element.types.ArmorTrim;
+import net.mcreator.element.types.Procedure;
 import net.mcreator.generator.Generator;
 import net.mcreator.generator.GeneratorConfiguration;
 import net.mcreator.generator.GeneratorFile;
@@ -114,6 +115,14 @@ public class SmokeTest {
 		addElement(workspace, "TestItem", ModElementType.ITEM, "test_item", fixtures);
 		addElement(workspace, "TestProcedure", ModElementType.PROCEDURE, "test_procedure", fixtures);
 		addArmorTrim(workspace, "TestTrim", "test_trim");
+		addTriggerProcedure(workspace, "TestItemCrafted", "test_item_crafted", "item_crafted");
+		addTriggerProcedure(workspace, "TestAdvancement", "test_advancement", "player_completes_advancement");
+		addTriggerProcedure(workspace, "TestCriticalHit", "test_critical_hit", "player_critical_hit");
+		addTriggerProcedure(workspace, "TestFishedItem", "test_fished_item", "player_fishes_item");
+		addTriggerProcedure(workspace, "TestEntityTamed", "test_entity_tamed", "entity_tamed");
+		addTriggerProcedure(workspace, "TestEntityTicks", "test_entity_ticks", "entity_ticks");
+		addTriggerProcedure(workspace, "TestEquipmentChange", "test_equipment_change", "entity_change_equipment");
+		addTriggerProcedure(workspace, "TestModLoad", "test_mod_load", "mod_load");
 
 		TemplateGenerator templateGenerator = generator.getTemplateGeneratorFromName("templates");
 		for (GeneratorTemplate template : generator.getModBaseGeneratorTemplatesList()) {
@@ -158,6 +167,13 @@ public class SmokeTest {
 		check(new File(workspace.getWorkspaceFolder(),
 				"src/main/java/net/mcreator/porttest/procedures/TestProcedureProcedure.java").isFile(),
 				"procedure class written");
+		File procedures = new File(workspace.getWorkspaceFolder(),
+				"src/main/java/net/mcreator/porttest/procedures");
+		check(new File(procedures, "TestItemCraftedProcedure.java").isFile()
+				&& new File(procedures, "TestEntityTicksProcedure.java").isFile()
+				&& new File(procedures, "TestEquipmentChangeProcedure.java").isFile()
+				&& new File(procedures, "TestModLoadProcedure.java").isFile(),
+				"P1 trigger procedures written");
 
 		if (!failures.isEmpty()) {
 			System.out.println("SMOKE TEST FAILED");
@@ -166,6 +182,23 @@ public class SmokeTest {
 		}
 		System.out.println("SMOKE TEST PASSED");
 		System.exit(0);
+	}
+
+	private static void addTriggerProcedure(Workspace workspace, String name, String registryName, String trigger) {
+		try {
+			ModElement element = new ModElement(workspace, name, ModElementType.PROCEDURE);
+			element.setRegistryName(registryName);
+			workspace.addModElement(element);
+			Procedure procedure = new Procedure(element);
+			procedure.procedurexml = "<xml xmlns=\"https://developers.google.com/blockly/xml\">"
+					+ "<block type=\"event_trigger\" deletable=\"false\" x=\"40\" y=\"40\">"
+					+ "<field name=\"trigger\">" + trigger + "</field></block></xml>";
+			procedure.skipDependencyNullCheck = false;
+			workspace.getModElementManager().storeModElement(procedure);
+			elements.add(procedure);
+		} catch (Throwable e) {
+			failures.add("loading trigger " + name + ": " + e);
+		}
 	}
 
 	private static void addArmorTrim(Workspace workspace, String name, String registryName) {

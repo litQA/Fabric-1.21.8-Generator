@@ -6,29 +6,36 @@
 - 参考：Fabric-Generator-MCreator `26.3-2026.3-2.9-beta`（上游 Fabric 26.3 实现）、1.21.8 官方映射 jar
 - 方法：对 mod element 定义、procedure block、trigger、AI task、变量类型、cmdarg、jsontrigger、feature、enchantment effect、模板路径、mapping key 做文件/键集合差集；逐项检查模板中的 NeoForge API 依赖；对上游 Fabric 2.9 做二次比对；对 1.21.8 jar 做 API 存在性抽查。**未做逐项游戏内行为验证**。
 
+> **P1 实施状态（2026.3-1.0.1-beta）**：本报告最初基于 P1 前的审计快照；P1 已补以下能力，下文的 procedure/trigger 统计也已同步为 P1 后状态：
+> - 8 个 trigger：`entity_change_equipment`、`entity_ticks`、`entity_tamed`、`item_crafted`、`mod_load`、`player_completes_advancement`、`player_critical_hit`、`player_fishes_item`；
+> - 7 个 procedure：`entity_submerged_height` + `item_nbt_{logic,num,text}_{get,set}`；
+> - 对应的事件类扩展与 5 个 mixin（`ResultSlotMixin`、`PlayerAdvancementsMixin`、`PlayerCriticalMixin`、`FishingHookMixin`、`TamableAnimalMixin`）。
+>
+> 当前有效覆盖约 **460/506 procedures（90.9%）**、**48/65 triggers（73.8%）**；下文的 procedure/trigger 统计已同步为 P1 后状态。
+
 ## 0. 结论摘要
 
 | 能力类别 | NeoForge 26.3 | Fabric 1.21.8（有效） | 覆盖率 | 缺失 | 主要缺口性质 |
 | --- | --- | --- | --- | --- | --- |
 | Mod element 类型 | 37 | 37 | 100% | 0 | — |
 | Common 基础类型 YAML | 9 | 5（名称） | 56%（名称） | 4 | 2 项有等价实现，2 项为 NeoForge data map |
-| Procedure blocks | 506 | 453 | 89.5% | 53 | 多为 NeoForge Capability / persistent data；少量可移植 |
-| Triggers | 65 | 40 | 61.5% | 25 | 2 项上游 Fabric 已实现；其余需新 Fabric 事件/mixin |
+| Procedure blocks | 506 | 460 | 90.9% | 46 | 多为 NeoForge Capability / persistent data；少量可移植 |
+| Triggers | 65 | 48 | 73.8% | 17 | 其余需新 Fabric 事件/mixin |
 | AI tasks | 36 | 36 | 100% | 0 | — |
 | 变量类型 | 10 | 10 | 100% | 0 | — |
 | Command arguments | 12 | 12 | 100% | 0 | — |
 | JSON triggers | 21 | 21 | 100% | 0 | — |
 | Feature 类型 | 107 | 110 | 103% | 0 | Fabric 侧多 3 个 1.21.8 feature |
 | Enchantment effects | 20 | 20 | 100% | 0 | — |
-| 模板路径（按文件名） | 203 | 182 同名 + 49 自有 | 89.7%（同名） | 21 | 多数是不同实现；实际功能缺口约 3–5 项 |
+| 模板路径（按文件名） | 203 | 182 同名 + 54 自有 | 89.7%（同名） | 21 | 多数是不同实现；实际功能缺口约 3–5 项 |
 | Mapping key | 1956 | 1819 | 93.0% | 137 | 全部为 26.3 新内容（`itemuseanimations.bundle` 已在 2026.3-1.0.1-beta 补上） |
 
 最需要处理的功能缺口（按优先级）：
 
 1. **盔甲纹饰 atlas 纹理路径错误**（`templates/armortrim/trims_atlas.json.ftl` 仍使用 1.21.1 的 `trims/models/armor`）——1.21.8 与 MCreator `ArmorTrim` 都使用 `trims/entity/humanoid` / `humanoid_leggings`。此项已在 2026.3-1.0.1-beta 修正。
 2. **`itemuseanimations` 缺少 `bundle`**——1.21.8 存在 `ItemUseAnimation.BUNDLE`；已在 2026.3-1.0.1-beta 补充。
-3. **25 个 trigger 未实现**，其中 `entity_change_equipment`、`entity_ticks` 上游 Fabric 2.9 已实现，可直接移植；其余需新事件/mixin。
-4. **可移植 procedure 缺口**：`entity_submerged_height`（上游 Fabric 有）、`item_nbt_*`（可用 1.21.8 `DataComponents.CUSTOM_DATA`）。
+3. **P1 已补 8 个 trigger**：`entity_change_equipment`、`entity_ticks`、`entity_tamed`、`item_crafted`、`mod_load`、`player_completes_advancement`、`player_critical_hit`、`player_fishes_item`；剩余 17 个需新事件/mixin。
+4. **P1 已补 procedure**：`entity_submerged_height` 和 6 个 `item_nbt_{logic,num,text}_{get,set}`；剩余可移植项主要是 `block_inv_*`、槽位/物品处理器。
 5. **transformable（斧头转换/去皮）块能力缺失**（26.3 data map；1.21.8 需要 `AxeItem` 映射/mixin）。
 
 > **审计修正（2026-11-03，2026.3-1.0.1-beta）**：初版报告把“盔甲纹饰 palette mcmeta”和“药水自动喷溅/滞留配方”列为 P0。复核 1.21.8 后修正：
@@ -57,7 +64,7 @@
 - `block.definition.yaml` 未声明 `transformable` 基础类型，也没有 `strippingResult` 相关模板；NeoForge 26.3 通过 `common.transformables.yaml` + `transformable` base type 支持自定义斧头转换/去皮。**Fabric 侧缺失**（1.21.8 需 `AxeItem.STRIPPABLES` 映射或 mixin）。
 - `flammable` 能力未走 `common.flammables.yaml`，但 `block.java.ftl` 使用 `FlammableBlockRegistry` 实现，**功能等价**。
 
-## 2. Procedure blocks（缺失 53 / 506）
+## 2. Procedure blocks（P1 后缺失 46 / 506）
 
 统计口径：`procedures/` 根目录 `.ftl`，排除 `_` 前缀辅助模板。
 
@@ -68,25 +75,23 @@
 | `block_inv_*` | 13 | can_insert / clear_slot / damage_item / extract_items / extract_items_get_result / get_amount_inslot / get_item_inslot / get_slot_count / get_slot_stack_limit / insert_items / insert_items_get_result / remove_items / set_items | **可移植（需重设计）** | 现实现依赖 `IItemHandler`；Fabric 可用 vanilla `Container` 或 Fabric Transfer API `ItemStorage`，工作量大；上游 Fabric 2.9 未实现 |
 | `block_nbt_*` | 6 | logic_get / logic_set / num_get / num_set / text_get / text_set | **Loader-specific/重设计** | 依赖 NeoForge `BlockEntity#getPersistentData()`；Fabric 无通用 BE 持久 NBT，需 SavedData/mixin |
 | `entity_nbt_*` | 6 | logic_get / logic_set / num_get / num_set / text_get / text_set | **Loader-specific/重设计** | 依赖 `Entity#getPersistentData()`；Fabric 无等价通用持久数据 |
-| `item_nbt_*` | 6 | logic_get / logic_set / num_get / num_set / text_get / text_set | **可移植** | 1.21.8 可用 `DataComponents.CUSTOM_DATA` 实现，需改变 NBT 表示 |
 | `entity_get_slot` / `entity_set_slot` / `entity_inventory_foreach` | 3 | 见左 | **可移植（需重设计）** | 依赖 NeoForge item capability；可用 `LivingEntity.getItemBySlot` / `Container` 近似实现 |
 | `itemhandler_get_slot` / `itemhandler_set_slot` | 2 | 见左 | **可移植（需重设计）** | 同上，需 Fabric Transfer API/容器抽象 |
 | `blockat_enchant_power_bonus` | 1 | 见左 | **可移植（mixin，低优先级）** | 1.21.8 无 `BlockState#getEnchantPowerBonus` 扩展点，需 mixin |
-| `entity_submerged_height` | 1 | 见左 | **可移植（上游已有）** | Fabric 2.9-beta 已实现该模板，可直接参考 |
-| **合计** | **53** | | | |
+| **合计** | **46** | | | |
 
-结论：53 项中，真正“可较直接移植”的约 8 项（item NBT ×6、entity_submerged_height、blockat_enchant_power_bonus），其余大多需要 Fabric 专属重设计，不能按 NeoForge 模板直接复制。
+结论：P1 已补 `item_nbt_*` 6 项和 `entity_submerged_height`；剩余 46 项中，可直接移植的仅 `blockat_enchant_power_bonus`，其余大多需要 Fabric 专属重设计。
 
-## 3. Triggers（缺失 25 / 65）
+## 3. Triggers（P1 后缺失 17 / 65）
+
+P1 已实现 8 个 trigger：`entity_change_equipment`、`entity_ticks`、`entity_tamed`、`item_crafted`、`mod_load`、`player_completes_advancement`、`player_critical_hit`、`player_fishes_item`。剩余 17 个：
 
 | 分类 | 数量 | Trigger | 判定 |
 | --- | --- | --- | --- |
-| 上游 Fabric 2.9 已实现 | 2 | `entity_change_equipment`, `entity_ticks` | **可移植（已知实现，P1）** |
-| 可由 Fabric API / ModInitializer 实现 | 2 | `mod_load`, `player_fishes_item` | 可移植（P1） |
-| 可由 vanilla 事件/mixin 实现 | 17 | `item_crafted`, `player_completes_advancement`, `player_critical_hit`, `entity_tamed`, `entity_switch_hand`, `entity_sets_attack_target`, `entity_struck_by_lightning`, `entity_uses_totem`, `item_destroyed`, `item_smelted`, `farmland_trampled`, `crop_attempts_growth`, `sapling_glow`, `gem_dropped`, `gem_expired`, `player_left_click_air`, `player_use_hoe` | 可移植（需新 mixin/事件，P2） |
+| 可由 vanilla 事件/mixin 实现 | 13 | `entity_switch_hand`, `entity_sets_attack_target`, `entity_struck_by_lightning`, `entity_uses_totem`, `item_destroyed`, `item_smelted`, `farmland_trampled`, `crop_attempts_growth`, `sapling_glow`, `gem_dropped`, `gem_expired`, `player_left_click_air`, `player_use_hoe` | 可移植（需新 mixin/事件，P2） |
 | 需要较深 mixin/自定义语义 | 4 | `entity_grief`, `village_siege`, `explosion_occurs`, `player_right_click_empty_hand` | 可移植但高风险（P3） |
 
-说明：25 项全部有 1.21.8 对应机制，不存在“26.3 独有、1.21.8 无法实现”的 trigger；但都未在当前 Fabric 生成器中实现，因此在 Blockly 中不可用。上游 Fabric 2.9 只实现了其中 2 个，说明上游也把这些视为待补能力。
+说明：17 项全部有 1.21.8 对应机制，不存在“26.3 独有、1.21.8 无法实现”的 trigger；剩余项在 Blockly 中仍不可用。
 
 ## 4. 其他生成器能力
 
@@ -169,7 +174,7 @@ stepsounds 10, structures 18
 2. `mappings/itemuseanimations.yaml` 增加 `bundle: ItemUseAnimation.BUNDLE`。
 3. 审计修正：`trim_palette.mcmeta` 与药水自动酿造配方经 1.21.8 验证不是缺口，不再列入 P0（见开头“审计修正”）。
 
-### P1（常用可移植能力）
+### P1（2026.3-1.0.1-beta 已处理）
 
 4. 移植 `entity_submerged_height`（上游 Fabric 2.9 已有）。
 5. 移植 `entity_change_equipment`、`entity_ticks` trigger（上游 Fabric 2.9 已有）。

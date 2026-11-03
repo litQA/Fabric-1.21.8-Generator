@@ -2,6 +2,10 @@
 
 ## 2026.3-1.0.1-beta
 
+### New Content
+- P1 trigger support: `entity_change_equipment`, `entity_ticks`, `entity_tamed`, `item_crafted`, `mod_load`, `player_completes_advancement`, `player_critical_hit` and `player_fishes_item`, backed by new generated events and mixins (`ResultSlotMixin`, `PlayerAdvancementsMixin`, `PlayerCriticalMixin`, `FishingHookMixin`, `TamableAnimalMixin`) plus the `LivingEntityMixin` equipment/tick hooks.
+- `entity_submerged_height` procedure block and the six `item_nbt_*` logic/number/text get/set blocks, using 1.21.8 `FluidTags` and `DataComponents.CUSTOM_DATA`.
+
 ### Changes
 - Version bumped to 2026.3-1.0.1-beta after the first real-machine build passed.
 - Capability audit corrections: 1.21.8 already registers generic POTION + gunpowder -> splash and splash + dragon's breath -> lingering brewing mixes, so no per-potion recipe generation is required; the 26.3 `trim_palette.mcmeta` output is part of the 26.3 equipment pipeline and has no 1.21.8 counterpart.
