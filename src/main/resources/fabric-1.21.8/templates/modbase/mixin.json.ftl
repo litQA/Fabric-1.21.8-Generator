@@ -23,6 +23,11 @@
 <#assign mixins = mixins + ['BoneMealItemMixin']>
 <#assign mixins = mixins + ['CommandsMixin']>
 <#assign mixins = mixins + ['ExperienceOrbMixin']>
+<#assign mixins = mixins + ['ResultSlotMixin']>
+<#assign mixins = mixins + ['PlayerAdvancementsMixin']>
+<#assign mixins = mixins + ['PlayerCriticalMixin']>
+<#assign mixins = mixins + ['FishingHookMixin']>
+<#assign mixins = mixins + ['TamableAnimalMixin']>
 {
   "required": true,
   "package": "${package}.mixin",

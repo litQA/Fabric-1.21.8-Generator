@@ -5,7 +5,7 @@ Generator plugin for MCreator 2026.3.44621 EAP that produces Fabric mods for Min
 | Property | Value |
 | --- | --- |
 | Generator id | `generator-fabric-1.21.8` |
-| Version | 1.0.0-beta |
+| Version | 2026.3-1.0.1-beta |
 | Minecraft | 1.21.8 |
 | MCreator | 2026.3.44621 EAP (`202600344621`) |
 | Fabric Loader | 0.20.1 |
@@ -18,7 +18,7 @@ Generator plugin for MCreator 2026.3.44621 EAP that produces Fabric mods for Min
 ## Layout
 
 ```
-plugin.json                     Plugin metadata (id, version 1.0.0-beta, supported MCreator versions)
+plugin.json                     Plugin metadata (id, version 2026.3-1.0.1-beta, supported MCreator versions)
 LICENSE
 README.md                       This document
 CHANGELOG.md                    Release notes
@@ -87,7 +87,7 @@ generated with both installed contained no fake content.
 # Parse every shipped YAML definition and Freemarker template and verify template references
 pwsh plugin/tools/validate.ps1
 
-# Package build/dist/generator-fabric-1.21.8-1.0.0-beta.zip
+# Package build/dist/generator-fabric-1.21.8-2026.3-1.0.1-beta.zip
 pwsh plugin/tools/build-plugin.ps1
 
 # Offline smoke test: plugin load, workspace creation and code generation through MCreator 2026.3 classes
@@ -103,7 +103,7 @@ pwsh plugin/tools/verify-workspace.ps1 -Workspace "B:\path\to\workspace" -Tasks 
 ## Installation
 
 1. Run `pwsh plugin/tools/build-plugin.ps1`.
-2. Install `build/dist/generator-fabric-1.21.8-1.0.0-beta.zip` through MCreator's plugin manager, or copy it to
+2. Install `build/dist/generator-fabric-1.21.8-2026.3-1.0.1-beta.zip` through MCreator's plugin manager, or copy it to
    `%USERPROFILE%\.mcreator\plugins`.
 3. Create a new workspace and select **Minecraft Fabric 1.21.8 Generator**.
 

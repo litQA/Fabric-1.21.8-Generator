@@ -113,5 +113,17 @@ public abstract class LivingEntityMixin {
 		if (!entity.getUseItem().isEmpty())
 			LivingEntityEvents.FINISH_USING_ITEM.invoker().onFinishUsingItem(entity, entity.getUseItem().copy(), entity.getUseItemRemainingTicks());
 	}
+
+	@Inject(method = "setItemSlot(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V", at = @At("HEAD"), require = 0)
+	public void setItemSlot(EquipmentSlot slot, ItemStack stack, CallbackInfo ci) {
+		LivingEntity entity = (LivingEntity) (Object) this;
+		if (entity.level() != null && !entity.level().isClientSide)
+			LivingEntityEvents.EQUIPMENT_CHANGE.invoker().onEquipmentChange(entity, slot, entity.getItemBySlot(slot).copy(), stack.copy());
+	}
+
+	@Inject(method = "tick()V", at = @At("TAIL"), require = 0)
+	public void tick(CallbackInfo ci) {
+		LivingEntityEvents.END_ENTITY_TICK.invoker().onEndTick((LivingEntity) (Object) this);
+	}
 }
 <#-- @formatter:on -->

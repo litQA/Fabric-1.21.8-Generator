@@ -30,9 +30,16 @@ public class ItemEvents {
 		return true;
 	});
 
+	public static final Event<ItemCrafted> ITEM_CRAFTED = EventFactory.createArrayBacked(ItemCrafted.class, (callbacks) -> (player, itemstack) -> Arrays.stream(callbacks).forEach(callback -> callback.onItemCrafted(player, itemstack)));
+
 	@FunctionalInterface
 	public interface BonemealUsed {
 		boolean onBonemealUsed(BlockPos position, Entity entity, ItemStack itemstack, BlockState blockstate);
+	}
+
+	@FunctionalInterface
+	public interface ItemCrafted {
+		void onItemCrafted(Player player, ItemStack itemstack);
 	}
 
 }

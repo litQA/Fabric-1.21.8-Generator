@@ -23,6 +23,9 @@ public class PlayerEvents {
 	public static final Event<TickEnd> END_PLAYER_TICK = EventFactory.createArrayBacked(TickEnd.class, (callbacks) -> (entity) -> Arrays.stream(callbacks).forEach(callback -> callback.onEndTick(entity)));
 	public static final Event<XPChange> XP_CHANGE = EventFactory.createArrayBacked(XPChange.class, (callbacks) -> (entity, amount) -> Arrays.stream(callbacks).forEach(callback -> callback.onXpChange(entity, amount)));
 	public static final Event<LevelChange> LEVEL_CHANGE = EventFactory.createArrayBacked(LevelChange.class, (callbacks) -> (entity, amount) -> Arrays.stream(callbacks).forEach(callback -> callback.onLevelChange(entity, amount)));
+	public static final Event<Advancement> ADVANCEMENT = EventFactory.createArrayBacked(Advancement.class, (callbacks) -> (player, advancement) -> Arrays.stream(callbacks).forEach(callback -> callback.onAdvancement(player, advancement)));
+	public static final Event<CriticalHit> CRITICAL_HIT = EventFactory.createArrayBacked(CriticalHit.class, (callbacks) -> (player, target, critical) -> Arrays.stream(callbacks).forEach(callback -> callback.onCriticalHit(player, target, critical)));
+	public static final Event<FishedItem> FISHED_ITEM = EventFactory.createArrayBacked(FishedItem.class, (callbacks) -> (player, itemstack) -> Arrays.stream(callbacks).forEach(callback -> callback.onFishedItem(player, itemstack)));
 
     public static final Event<PickupXp> PICKUP_XP = EventFactory.createArrayBacked(PickupXp.class, (callbacks) -> (entity) -> {
 		for (PickupXp event : callbacks) {
@@ -47,6 +50,21 @@ public class PlayerEvents {
 	@FunctionalInterface
 	public interface LevelChange {
 		void onLevelChange(Player player, int amount);
+	}
+
+	@FunctionalInterface
+	public interface Advancement {
+		void onAdvancement(ServerPlayer player, net.minecraft.advancements.AdvancementHolder advancement);
+	}
+
+	@FunctionalInterface
+	public interface CriticalHit {
+		void onCriticalHit(Player player, Entity target, boolean critical);
+	}
+
+	@FunctionalInterface
+	public interface FishedItem {
+		void onFishedItem(Player player, ItemStack itemstack);
 	}
 
 	@FunctionalInterface

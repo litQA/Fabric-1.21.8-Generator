@@ -140,6 +140,21 @@ base_templates:
   - template: mixin/experienceorb_mixin.java.ftl
     writer: java
     name: "@SRCROOT/@BASEPACKAGEPATH/mixin/ExperienceOrbMixin.java"
+  - template: mixin/resultslot_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/ResultSlotMixin.java"
+  - template: mixin/playeradvancements_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/PlayerAdvancementsMixin.java"
+  - template: mixin/playercritical_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/PlayerCriticalMixin.java"
+  - template: mixin/fishinghook_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/FishingHookMixin.java"
+  - template: mixin/tamableanimal_mixin.java.ftl
+    writer: java
+    name: "@SRCROOT/@BASEPACKAGEPATH/mixin/TamableAnimalMixin.java"
 
 # Custom events
   - template: event/livingentity_events.java.ftl
