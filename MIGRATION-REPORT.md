@@ -13,7 +13,7 @@
 | Java | 25 toolchain (MCreator JDK 25), 21 bytecode (`options.release = 21`) |
 | Gradle | 9.8.0, local `file:///` distribution |
 | License | CC BY-NC 4.0 |
-| Version | 1.0.0-beta |
+| Version | 2026.3-1.0.1-beta |
 
 Reference material used during the port:
 
@@ -125,7 +125,7 @@ Legend: **Done** = implemented and statically validated; **Partial** = generic/s
 | Blockly enchantment effect builder | Partial | Generated through the 2026.3 shared datapack `enchantment.json.ftl`; Fabric-side build verification pending. |
 | Custom armor attribute modifiers | Done | `templates/armor/armor.java.ftl` builds `ItemAttributeModifiers` including default armor values and per-piece custom modifiers. |
 | Dimension custom skybox, sun and moon | Not implemented | Fields excluded; the 2026.3 implementation depends on 26.x render pipelines. |
-| Armor trims mod element | Done | `armortrim.definition.yaml` plus trim pattern, smithing recipe and atlas templates. |
+| Armor trims mod element | Done | `armortrim.definition.yaml` plus trim pattern, smithing recipe and atlas templates; atlas uses the 1.21.8 `trims/entity/humanoid` / `humanoid_leggings` texture paths. |
 | Special entity raft / chest raft | Not implemented | Custom `Boat` subclasses cannot select the vanilla bamboo raft variant without a separate entity type and renderer. |
 | Special entity item rarity | Done | Rarity is applied to the generated boat item properties. |
 | Enchantment effects: XP modifiers, unequip, vanish on death | Partial | Shared 2026.3 datapack template. |
@@ -172,7 +172,7 @@ Legend: **Done** = implemented and statically validated; **Partial** = generic/s
 - Items and tools: the 2026.3 mapped `EquipmentSlotEntry` values are emitted directly and `"default"` falls back
   to `EquipmentSlotGroup.MAINHAND`. `ItemUseAnimation` is emitted as the mapped value, and food/drink checks use
   `getUnmappedValue()`. The animation mapping targets `ItemUseAnimation` (the 1.21.8 class name) rather than the
-  2026.3 1.21.1 `UseAnim` value.
+  2026.3 1.21.1 `UseAnim` value, and includes the 1.21.8 `bundle` value.
 - Magic item expressions (for example `procedure_retval_itemstack`) are trimmed before the `/*@ItemStack*/` /
   `/*@BlockState*/` marker checks, so procedure return values are not wrapped in a second `new ItemStack(...)`.
 - Armor: custom attribute modifiers per armor piece, default armor/toughness/knockback modifiers preserved, and
@@ -216,10 +216,12 @@ procedure from the fixtures in `workspace/test-min/elements`. Result of the run 
   ok   definitions loaded: 37
   ok   armor trim definition present
   ok   workspace created with the Fabric generator
-  ok   base templates rendered: 24
+  ok   base templates rendered: 25
   ok   mod base class written
   ok   mixin configuration written
-  ok   element files generated: 10
+  ok   armor trim atlas written
+  ok   armor trim atlas uses 1.21.8 texture paths
+  ok   element files generated: 12
   ok   block class written
   ok   item class written
   ok   procedure class written

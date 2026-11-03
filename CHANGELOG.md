@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026.3-1.0.1-beta
+
+### Changes
+- Version bumped to 2026.3-1.0.1-beta after the first real-machine build passed.
+- Capability audit corrections: 1.21.8 already registers generic POTION + gunpowder -> splash and splash + dragon's breath -> lingering brewing mixes, so no per-potion recipe generation is required; the 26.3 `trim_palette.mcmeta` output is part of the 26.3 equipment pipeline and has no 1.21.8 counterpart.
+
+### Fixes
+Fixed 2 bug(s).
+- Armor trim atlas textures were referenced at the pre-1.21.2 `trims/models/armor` paths; the generated atlas now uses `trims/entity/humanoid` and `trims/entity/humanoid_leggings`, matching 1.21.8 and the MCreator `ArmorTrim` texture copy paths.
+- The item use animation mapping was missing `bundle`, which is a valid `ItemUseAnimation` value in 1.21.8.
+
 ## 1.0.0-beta
 
 First beta release of the Fabric 1.21.8 generator for MCreator 2026.3 EAP 2026344621. This is the first beta

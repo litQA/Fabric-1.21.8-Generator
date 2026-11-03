@@ -4,8 +4,8 @@
       "type": "paletted_permutations",
       "textures": [
         <#list armortrims as trim>
-          "${modid}:trims/models/armor/${trim.getModElement().getRegistryName()}",
-          "${modid}:trims/models/armor/${trim.getModElement().getRegistryName()}_leggings"<#sep>,
+          "${modid}:trims/entity/humanoid/${trim.getModElement().getRegistryName()}",
+          "${modid}:trims/entity/humanoid_leggings/${trim.getModElement().getRegistryName()}"<#sep>,
         </#list>
       ],
       "palette_key": "trims/color_palettes/trim_palette",

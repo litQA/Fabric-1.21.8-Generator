@@ -2,7 +2,7 @@
 
 - 审计日期：2026-11-03
 - 基准（Baseline）：MCreator 2026.3 内置 **NeoForge 26.3** 生成器（`generator-26.3.x/neoforge-26.3` + `datapack-26.3.x`）
-- 对象（Target）：当前插件 1.0.0-beta 的有效 Fabric 1.21.8 生成器（`fabric-1.21.8` + `fabric-1.21.8-base/{datapack,neoforge}`）
+- 对象（Target）：当前插件 2026.3-1.0.1-beta 的有效 Fabric 1.21.8 生成器（`fabric-1.21.8` + `fabric-1.21.8-base/{datapack,neoforge}`）
 - 参考：Fabric-Generator-MCreator `26.3-2026.3-2.9-beta`（上游 Fabric 26.3 实现）、1.21.8 官方映射 jar
 - 方法：对 mod element 定义、procedure block、trigger、AI task、变量类型、cmdarg、jsontrigger、feature、enchantment effect、模板路径、mapping key 做文件/键集合差集；逐项检查模板中的 NeoForge API 依赖；对上游 Fabric 2.9 做二次比对；对 1.21.8 jar 做 API 存在性抽查。**未做逐项游戏内行为验证**。
 
@@ -21,16 +21,19 @@
 | Feature 类型 | 107 | 110 | 103% | 0 | Fabric 侧多 3 个 1.21.8 feature |
 | Enchantment effects | 20 | 20 | 100% | 0 | — |
 | 模板路径（按文件名） | 203 | 182 同名 + 49 自有 | 89.7%（同名） | 21 | 多数是不同实现；实际功能缺口约 3–5 项 |
-| Mapping key | 1956 | 1818 | 92.9% | 138 | 137 项为 26.3 新内容；1 项为 1.21.8 真实缺口 |
+| Mapping key | 1956 | 1819 | 93.0% | 137 | 全部为 26.3 新内容（`itemuseanimations.bundle` 已在 2026.3-1.0.1-beta 补上） |
 
 最需要处理的功能缺口（按优先级）：
 
-1. **盔甲纹饰调色板 mcmeta 缺失**（`armortrim/trim_palette.mcmeta.ftl`）——已实现的 armor trim 元素不完整。
-2. **自定义药水的喷溅/滞留自动酿造配方缺失**（26.3 用数据驱动 `potion/potion_recipe.json`；Fabric 侧只有配方元素，没有 potion 自动转换）。
-3. **`itemuseanimations` 缺少 `bundle`**——1.21.8 存在 `ItemUseAnimation.BUNDLE`，当前映射文件缺少该 key。
-4. **25 个 trigger 未实现**，其中 `entity_change_equipment`、`entity_ticks` 上游 Fabric 2.9 已实现，可直接移植；其余需新事件/mixin。
-5. **可移植 procedure 缺口**：`entity_submerged_height`（上游 Fabric 有）、`item_nbt_*`（可用 1.21.8 `DataComponents.CUSTOM_DATA`）。
-6. **transformable（斧头转换/去皮）块能力缺失**（26.3 data map；1.21.8 需要 `AxeItem` 映射/mixin）。
+1. **盔甲纹饰 atlas 纹理路径错误**（`templates/armortrim/trims_atlas.json.ftl` 仍使用 1.21.1 的 `trims/models/armor`）——1.21.8 与 MCreator `ArmorTrim` 都使用 `trims/entity/humanoid` / `humanoid_leggings`。此项已在 2026.3-1.0.1-beta 修正。
+2. **`itemuseanimations` 缺少 `bundle`**——1.21.8 存在 `ItemUseAnimation.BUNDLE`；已在 2026.3-1.0.1-beta 补充。
+3. **25 个 trigger 未实现**，其中 `entity_change_equipment`、`entity_ticks` 上游 Fabric 2.9 已实现，可直接移植；其余需新事件/mixin。
+4. **可移植 procedure 缺口**：`entity_submerged_height`（上游 Fabric 有）、`item_nbt_*`（可用 1.21.8 `DataComponents.CUSTOM_DATA`）。
+5. **transformable（斧头转换/去皮）块能力缺失**（26.3 data map；1.21.8 需要 `AxeItem` 映射/mixin）。
+
+> **审计修正（2026-11-03，2026.3-1.0.1-beta）**：初版报告把“盔甲纹饰 palette mcmeta”和“药水自动喷溅/滞留配方”列为 P0。复核 1.21.8 后修正：
+> - 1.21.8 的原版 `armor_trims` atlas 使用 `trims/entity/humanoid`，纹饰纹理没有 `.png.mcmeta`；`trim_palette.mcmeta` 是 26.3 装备渲染体系的产物，1.21.8 不需要。真正的缺口是 Fabric 生成的 atlas 路径。
+> - 1.21.8 的 `PotionBrewing.addVanillaMixes` 已注册通用的 `POTION + gunpowder → SPLASH_POTION`、`SPLASH_POTION + dragon_breath → LINGERING_POTION` 容器配方，并保留任意药水的 `POTION_CONTENTS`，因此自定义药水无需逐条生成配方；26.3 的 `potion/potion_recipe.json` 是 26.3 数据驱动体系的要求。
 
 ## 1. Mod element 定义
 
@@ -45,7 +48,7 @@
 | `itemextension` | `templates`（fuel/compost data map JSON） | 等价 | Fabric 使用 `FuelRegistryEvents` / `CompostingChanceRegistry` |
 | `livingentity` | `global_templates`（monster_room_mobs data map） | 等价 | Fabric 使用 `MonsterRoomFeatureMixin` + AW |
 | `painting` | `tags` | 等价 | Fabric 使用 `json/painting.json.ftl` + `global_templates` tag |
-| `potion` | `templates`（自动生成 gunpowder / dragon_breath 酿造配方） | **部分缺口** | 自定义药水无法自动获得喷溅/滞留配方 |
+| `potion` | `templates`（自动生成 gunpowder / dragon_breath 酿造配方） | 等价（N/A） | 1.21.8 原版 `PotionBrewing.addVanillaMixes` 的通用容器配方已覆盖自定义药水的喷溅/滞留转换；26.3 才需要逐药水数据驱动配方 |
 | `villagerprofession` | `tags` | 等价 | Fabric 使用 `json/villagerprofessions_poi_tag.json.ftl` |
 | `villagertrade` | `list_templates` + `tags`（26.3 数据驱动交易与分类） | **部分缺口** | Fabric 代码式交易可用，但 wandering trader category / tag-based trade set 缺失 |
 
@@ -102,7 +105,7 @@ NeoForge 26.3 有 203 个唯一模板路径，Fabric 有效集合 231 个（Fabr
 
 | 缺失模板 | 判定 | 说明 / Fabric 对应实现 |
 | --- | --- | --- |
-| `armortrim/trim_palette.mcmeta.ftl` | **缺口（P1）** | 盔甲纹饰纹理的 palette mcmeta；当前 armortrim 只生成 pattern/recipe/atlas |
+| `armortrim/trim_palette.mcmeta.ftl` | N/A（26.3 专用） | 1.21.8 纹饰纹理无 `.png.mcmeta`；**实际缺口**是 `trims_atlas.json.ftl` 的纹理路径，已在 2026.3-1.0.1-beta 修正 |
 | `biome/material_rule.json.ftl` | **缺口（P2）** | 自定义生物群系 surface/material rule；1.21.8 有 surface rules，可移植 datapack 模板 |
 | `dimension/effects_timeline.json.ftl` | N/A | 26.3 timeline 体系，1.21.8 无对应概念 |
 | `dimension/fixed_timeline.json.ftl` | N/A | 同上 |
@@ -115,7 +118,7 @@ NeoForge 26.3 有 203 个唯一模板路径，Fabric 有效集合 231 个（Fabr
 | `json/txblock/sign_model.json.ftl` 等 4 个 sign 模板 | **不同实现（需验证）** | Fabric 侧使用通用 `block.java.ftl` + `block_states.json.ftl` 生成 sign；未发现等价性测试 |
 | `livingentity/monster_room_mobs.json.ftl` | 等价 | `json/monster_room_mobs.json.ftl` + `MonsterRoomFeatureMixin` |
 | `painting/painting.json.ftl` | 等价 | `json/painting.json.ftl` |
-| `potion/potion_recipe.json.ftl` | **部分缺口（P1）** | 自动生成喷溅/滞留酿造配方缺失（见 1 节） |
+| `potion/potion_recipe.json.ftl` | 等价（N/A） | 1.21.8 原版通用容器配方已覆盖喷溅/滞留转换；26.3 数据驱动配方不适用于 1.21.8 |
 | `recipe/brewing.json.ftl` | 等价 | `elementinits/brewingrecipes.java.ftl`（Fabric API 仅 potion→potion） |
 | `villager_trade.json.ftl` | **部分缺口（P1）** | 代码式交易可用，但 26.3 的数据驱动分类/tag 交易缺失 |
 | `villagerprofession/profession_hat.mcmeta.ftl` | 等价 | 根目录 `profession_hat.mcmeta.ftl` |
@@ -124,24 +127,23 @@ NeoForge 26.3 有 203 个唯一模板路径，Fabric 有效集合 231 个（Fabr
 ## 6. Mapping key 覆盖
 
 - 43/43 个 mapping 文件均存在。
-- NeoForge 26.3 共 1956 个 key，Fabric 有效集合 1818 个（92.9%），缺少 138 个。
-- 抽查 1.21.8 映射 jar 后，137 个缺失 key 属于 **26.3 新内容**（新生物、方块、粒子、结构、动画、gamerule、attribute 等），对 1.21.8 不适用；**1 个为 1.21.8 真实缺口**：
+- NeoForge 26.3 共 1956 个 key，Fabric 有效集合 1819 个（93.0%），缺少 137 个；`itemuseanimations.bundle` 已在 2026.3-1.0.1-beta 补上。
+- 抽查 1.21.8 映射 jar 后，剩余 137 个缺失 key 全部属于 **26.3 新内容**（新生物、方块、粒子、结构、动画、gamerule、attribute 等），对 1.21.8 不适用：
 
 | 文件 | 缺失 key | 判定 |
 | --- | --- | --- |
-| `itemuseanimations.yaml` | `bundle` | **1.21.8 有效**（`ItemUseAnimation.BUNDLE` 存在），应补 |
 | `itemuseanimations.yaml` | `trident` | N/A（1.21.8 无 `TRIDENT`） |
 | `animations.yaml` | 31 项 | N/A（26.3 新生物动画） |
 | `attributes.yaml` | `AIR_DRAG_MODIFIER`, `BELOW_NAME_DISTANCE`, `BOUNCINESS`, `FRICTION_MODIFIER` | N/A（1.21.8 无这些 attribute） |
 | `gamerules.yaml` | `PVP`, `SPAWN_MONSTERS`, `COMMAND_BLOCKS_WORK`, `SPAWNER_BLOCKS_WORK`, `FIRE_SPREAD_RADIUS_AROUND_PLAYER`, `ALLOW_ENTERING_NETHER_USING_PORTALS` | N/A（1.21.8 无这些 gamerule） |
-| `biomes.yaml` / `configuredfeatures.yaml` / `structures.yaml` / `blockstateproperties.yaml` / `damagesources.yaml` / `effects.yaml` / `enchantments.yaml` / `entities.yaml` / `gameevents.yaml` / `noteblockinstruments.yaml` / `particles.yaml` / `pathnodetypes.yaml` / `screens.yaml` / `stepsounds.yaml` | 其余 133 项 | N/A（26.3 新内容） |
+| `biomes.yaml` / `configuredfeatures.yaml` / `structures.yaml` / `blockstateproperties.yaml` / `damagesources.yaml` / `effects.yaml` / `enchantments.yaml` / `entities.yaml` / `gameevents.yaml` / `noteblockinstruments.yaml` / `particles.yaml` / `pathnodetypes.yaml` / `screens.yaml` / `stepsounds.yaml` | 其余 136 项 | N/A（26.3 新内容） |
 
 完整缺失计数（按文件）：
 
 ```
 animations 31, attributes 4, biomes 2, blockstateproperties 3,
 configuredfeatures 18, damagesources 2, effects 1, enchantments 1,
-entities 11, gameevents 1, gamerules 6, itemuseanimations 2,
+entities 11, gameevents 1, gamerules 6, itemuseanimations 1,
 noteblockinstruments 4, particles 10, pathnodetypes 1, screens 13,
 stepsounds 10, structures 18
 ```
@@ -161,11 +163,11 @@ stepsounds 10, structures 18
 
 ## 8. 建议修复顺序
 
-### P0（已声明支持但不完整）
+### P0（2026.3-1.0.1-beta 已处理）
 
-1. `armortrim/trim_palette.mcmeta.ftl` + `armortrim.definition.yaml` 两个 mcmeta 输出。
-2. 自定义药水自动喷溅/滞留酿造配方（Fabric `PotionBrewing` mixin 或 Fabric API 扩展）。
-3. `mappings/itemuseanimations.yaml` 增加 `bundle`。
+1. 修正 `templates/armortrim/trims_atlas.json.ftl` 的纹理路径：`trims/models/armor` → `trims/entity/humanoid` / `humanoid_leggings`，与 1.21.8 原版 atlas 和 MCreator `ArmorTrim` 的文件复制路径一致。
+2. `mappings/itemuseanimations.yaml` 增加 `bundle: ItemUseAnimation.BUNDLE`。
+3. 审计修正：`trim_palette.mcmeta` 与药水自动酿造配方经 1.21.8 验证不是缺口，不再列入 P0（见开头“审计修正”）。
 
 ### P1（常用可移植能力）
 

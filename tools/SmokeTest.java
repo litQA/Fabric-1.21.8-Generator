@@ -3,6 +3,8 @@ import net.mcreator.blockly.data.BlocklyLoader;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.element.ModElementType;
 import net.mcreator.element.ModElementTypeLoader;
+import net.mcreator.element.parts.MItemBlock;
+import net.mcreator.element.types.ArmorTrim;
 import net.mcreator.generator.Generator;
 import net.mcreator.generator.GeneratorConfiguration;
 import net.mcreator.generator.GeneratorFile;
@@ -111,6 +113,7 @@ public class SmokeTest {
 		addElement(workspace, "TestBlock", ModElementType.BLOCK, "test_block", fixtures);
 		addElement(workspace, "TestItem", ModElementType.ITEM, "test_item", fixtures);
 		addElement(workspace, "TestProcedure", ModElementType.PROCEDURE, "test_procedure", fixtures);
+		addArmorTrim(workspace, "TestTrim", "test_trim");
 
 		TemplateGenerator templateGenerator = generator.getTemplateGeneratorFromName("templates");
 		for (GeneratorTemplate template : generator.getModBaseGeneratorTemplatesList()) {
@@ -130,6 +133,15 @@ public class SmokeTest {
 		check(modFile.isFile(), "mod base class written");
 		File mixins = new File(workspace.getWorkspaceFolder(), "src/main/resources/porttest.mixins.json");
 		check(mixins.isFile(), "mixin configuration written");
+		File trimAtlas = new File(workspace.getWorkspaceFolder(),
+				"src/main/resources/assets/minecraft/atlases/armor_trims.json");
+		check(trimAtlas.isFile(), "armor trim atlas written");
+		if (trimAtlas.isFile()) {
+			String atlas = Files.readString(trimAtlas.toPath(), StandardCharsets.UTF_8);
+			check(atlas.contains("trims/entity/humanoid/test_trim")
+					&& atlas.contains("trims/entity/humanoid_leggings/test_trim")
+					&& !atlas.contains("trims/models/armor"), "armor trim atlas uses 1.21.8 texture paths");
+		}
 
 		for (GeneratableElement element : elements) {
 			try {
@@ -154,6 +166,29 @@ public class SmokeTest {
 		}
 		System.out.println("SMOKE TEST PASSED");
 		System.exit(0);
+	}
+
+	private static void addArmorTrim(Workspace workspace, String name, String registryName) {
+		try {
+			ModElement element = new ModElement(workspace, name, ModElementType.ARMORTRIM);
+			element.setRegistryName(registryName);
+			workspace.addModElement(element);
+			ArmorTrim trim = new ArmorTrim(element);
+			trim.name = "Test Trim";
+			trim.item = new MItemBlock(workspace, "Items.IRON_INGOT");
+			trim.armorTextureFile = "test";
+			// The smoke test does not ship armor textures; create placeholders so finalizeModElementGeneration
+			// can exercise the texture copy step without logging errors.
+			File armorDir = new File(workspace.getWorkspaceFolder(),
+					"src/main/resources/assets/porttest/textures/models/armor");
+			armorDir.mkdirs();
+			Files.write(new File(armorDir, "test_layer_1.png").toPath(), new byte[] { (byte) 0x89, 'P', 'N', 'G' });
+			Files.write(new File(armorDir, "test_layer_2.png").toPath(), new byte[] { (byte) 0x89, 'P', 'N', 'G' });
+			workspace.getModElementManager().storeModElement(trim);
+			elements.add(trim);
+		} catch (Throwable e) {
+			failures.add("loading " + name + ": " + e);
+		}
 	}
 
 	private static void addElement(Workspace workspace, String name, ModElementType<?> type, String registryName,
