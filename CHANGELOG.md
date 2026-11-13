@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026.3-1.0.2.1-beta
+
+### Changes
+- Gradle distribution URLs in the plugin and generated workspace templates now use the public Gradle 9.8.0
+  distribution instead of a machine-local file URL.
+- Generated workspace wrappers set `GRADLE_USER_HOME` to the project-local `caches/gradle` directory, so Gradle
+  distribution and dependency caches stay inside the generated project.
+- Validation and smoke-test scripts resolve the MCreator installation from `-MCreatorPath` or the
+  `MCREATOR_PATH` environment variable; the workspace-relative tool paths are derived from the plugin directory.
+- The offline smoke-test fixtures are bundled under `plugin/tools/fixtures`, so the plugin directory remains
+  self-contained.
+- Documentation examples use placeholders instead of drive-letter paths, and the obsolete pre-2026.3 delivery
+  document is marked as superseded.
+- Version metadata moved to the four-part `2026.3-1.0.2.1-beta` format.
+
+### Fixes
+Fixed 6 bug(s).
+- The Fabric workspace template embedded an absolute local Gradle distribution URL, so every generated project
+  inherited a path that only existed on the development machine.
+- The plugin's own Gradle wrapper embedded the same absolute local distribution URL.
+- `plugin/gradle.properties` retained an unused `gradle_distribution_url` property with an absolute local path.
+- `validate.ps1` and `smoke-test.ps1` defaulted `MCreatorPath` to a hard-coded drive path.
+- README and MIGRATION-REPORT examples and explanations still described local absolute Gradle paths as required.
+- The smoke test depended on a fixture directory outside the plugin directory.
+
 ## 2026.3-1.0.1-beta
 
 ### New Content

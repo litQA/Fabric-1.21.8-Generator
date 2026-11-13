@@ -11,9 +11,9 @@
 | Fabric Loader | 0.20.1 |
 | Fabric API | 0.136.1+1.21.8 |
 | Java | 25 toolchain (MCreator JDK 25), 21 bytecode (`options.release = 21`) |
-| Gradle | 9.8.0, local `file:///` distribution |
+| Gradle | 9.8.0, public distribution URL |
 | License | CC BY-NC 4.0 |
-| Version | 2026.3-1.0.1-beta |
+| Version | 2026.3-1.0.2.1-beta |
 
 Reference material used during the port:
 
@@ -200,9 +200,10 @@ Legend: **Done** = implemented and statically validated; **Partial** = generic/s
 - Fabric Loom `1.15.5`, Fabric Loader `0.20.1`, Fabric API `0.136.1+1.21.8`.
 - Java 21 bytecode (`options.release = 21`) compiled with the MCreator JDK 25; `sourceCompatibility` and
   `targetCompatibility` are 21 so the produced mod runs on Java 21+.
-- `gradle-wrapper.properties` points at the local Gradle 9.8.0 archive
-  (`file:///B:/QA/Documents/App/Mods/DSH/Fabric_Generator_1.21.8/Reference%20resources/gradle-9.8.0-bin.zip`).
-- Gradle wrapper scripts and wrapper jar were taken from the local 9.8.0 distribution / working test project.
+- `gradle-wrapper.properties` uses the public Gradle 9.8.0 distribution URL
+  (`https://services.gradle.org/distributions/gradle-9.8.0-bin.zip`); no local filesystem path is embedded.
+- Gradle wrapper scripts are taken from the 9.8.0 distribution and redirect `GRADLE_USER_HOME` to the
+  generated project's `caches/gradle` directory.
 
 ## 7. Verification performed
 
@@ -215,7 +216,7 @@ smoke test drives the real MCreator 2026.3 classes directly.
 
 The smoke test loads the packaged plugin with MCreator's own `PluginLoader`, constructs the generator
 configuration, creates a real workspace, renders every base template and generates a block, item and
-procedure from the fixtures in `workspace/test-min/elements`. Result of the run in this workspace:
+procedure from the fixtures in `plugin/tools/fixtures/test-min/elements`. Result of the run in this workspace:
 
 ```
   ok   plugin generator-fabric-1.21.8 loaded
@@ -301,8 +302,8 @@ loading correctly (the 945-element audit found no definition or template resolut
 
 1. `plugin/tools/validate.ps1` (static validator built against MCreator 2026.3 libraries):
    - 172 YAML files parse;
-   - 1686 Freemarker templates parse;
-   - 634 template references and 830 includes resolve;
+   - 1754 Freemarker templates parse;
+   - 653 template references and 889 includes resolve;
    - validation passes.
 2. The plugin archive is produced by `plugin/tools/build-plugin.ps1` and contains exactly one
    `generator.yaml` (`fabric-1.21.8/generator.yaml`), so the base layers are not registered as generators.
@@ -314,21 +315,21 @@ Verification steps for the user:
 
 ```powershell
 # 1. Static validation
-pwsh plugin/tools/validate.ps1
+pwsh plugin/tools/validate.ps1 -MCreatorPath "<MCreator installation>"
 
 # 2. Package the plugin
 pwsh plugin/tools/build-plugin.ps1
 
 # 3. Offline smoke test (plugin load, workspace creation, code generation)
-pwsh plugin/tools/smoke-test.ps1
+pwsh plugin/tools/smoke-test.ps1 -MCreatorPath "<MCreator installation>"
 
 # 4. Install the ZIP from build/dist into MCreator (Preferences > Manage plugins) or copy it to
 #    %USERPROFILE%\.mcreator\plugins
 
 # 5. Create a Fabric 1.21.8 workspace with a block, an item and a procedure, then generate and build.
 
-# 6. Build a workspace with all caches redirected to <repo>/caches/gradle
-pwsh plugin/tools/verify-workspace.ps1 -Workspace "B:\path\to\workspace" -Tasks build
+# 6. Build a workspace with all caches redirected to <workspace>/caches/gradle
+pwsh plugin/tools/verify-workspace.ps1 -Workspace "<generated workspace>" -Tasks build
 ```
 
 ### 7.5 Coexistence test
@@ -364,8 +365,9 @@ The 945-element audit was also repeated with the namespaced package: 945/945 ele
 - The `fabric-1.21.8-base/neoforge` base layer is a private resource superset. It is never used by the Fabric base
   templates, but its NeoForge files remain inside the archive to keep inherited definition paths resolvable. No
   generated Fabric code references `net.neoforged`.
-- The Gradle wrapper URL is an absolute local path (`file:///B:/...`) as required by the delivery rules; moving
-  the repository requires updating `workspacebase/gradle/wrapper/gradle-wrapper.properties`,
-  `plugin/gradle/wrapper/gradle-wrapper.properties` and `plugin/gradle.properties`.
+- The Gradle wrappers and templates contain no local filesystem paths. They use the public Gradle 9.8.0
+  distribution URL and redirect `GRADLE_USER_HOME` to the generated project's `caches/gradle`; offline builds
+  must provide the distribution through a wrapper override or a pre-populated project cache, not through a
+  path committed to the plugin.
 - Item, block, villager trade and living entity elements created with 2026.1 workspaces are converted by
   MCreator on load; the migration was not exercised here.

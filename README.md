@@ -18,7 +18,7 @@ Generator plugin for MCreator that produces Fabric mods for Minecraft 1.21.8.
 ## Layout
 
 ```
-plugin.json                     Plugin metadata (id, version 2026.3-1.0.1-beta, supported MCreator versions)
+plugin.json                     Plugin metadata (id, version 2026.3-1.0.2.1-beta, supported MCreator versions)
 LICENSE
 README.md                       This document
 CHANGELOG.md                    Release notes
@@ -87,20 +87,19 @@ Run these from the repository root:
 
 ```powershell
 # Parse every shipped YAML definition and Freemarker template and verify template references
-pwsh .\plugin\tools\validate.ps1
+pwsh .\plugin\tools\validate.ps1 -MCreatorPath "<MCreator installation>"
 
 # Package plugin\build\dist\generator-fabric-1.21.8.zip
 pwsh .\plugin\tools\build-plugin.ps1
 
 # Offline smoke test: plugin load, workspace creation and code generation through MCreator 2026.3 classes
-pwsh .\plugin\tools\smoke-test.ps1
+pwsh .\plugin\tools\smoke-test.ps1 -MCreatorPath "<MCreator installation>"
 
-# Build a generated workspace with Gradle caches redirected to <repo>/caches/gradle
-pwsh .\plugin\tools\verify-workspace.ps1 -Workspace "B:\path\to\workspace" -Tasks build
+# Build a generated workspace with Gradle caches redirected to <workspace>/caches/gradle
+pwsh .\plugin\tools\verify-workspace.ps1 -Workspace "<generated workspace>" -Tasks build
 ```
 
-`validate.ps1` needs the MCreator EAP installation for its JDK and the Freemarker / SnakeYAML libraries. Pass
-`-MCreatorPath` if the installation is not at the default location.
+`validate.ps1` and `smoke-test.ps1` require `-MCreatorPath` (or the `MCREATOR_PATH` environment variable) pointing at the MCreator EAP installation. Their Gradle and workspace paths are resolved relative to the plugin directory.
 
 ## Installation
 

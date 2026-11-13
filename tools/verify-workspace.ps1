@@ -1,7 +1,7 @@
 # Runs the Gradle build of a generated Fabric 1.21.8 workspace with all caches redirected to the
-# repository's caches directory, as required by the project delivery rules.
+# generated workspace's caches directory, as required by the project delivery rules.
 #
-# Usage: pwsh plugin/tools/verify-workspace.ps1 -Workspace "B:\path\to\workspace" [-Tasks build]
+# Usage: pwsh plugin/tools/verify-workspace.ps1 -Workspace "<workspace>" [-Tasks build]
 param(
     [Parameter(Mandatory = $true)][string]$Workspace,
     [string[]]$Tasks = @('build')
@@ -9,9 +9,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$pluginRoot = Split-Path -Parent $PSScriptRoot
-$repoRoot = Split-Path -Parent $pluginRoot
-$gradleHome = Join-Path $repoRoot 'caches/gradle'
+$gradleHome = Join-Path $Workspace 'caches/gradle'
 $gradlew = Join-Path $Workspace 'gradlew.bat'
 
 if (-not (Test-Path $gradlew)) { throw "gradlew.bat not found in $Workspace" }

@@ -110,7 +110,7 @@ public class SmokeTest {
 		Generator generator = workspace.getGenerator();
 		check(generator != null, "workspace created with the Fabric generator");
 
-		File fixtures = new File(System.getProperty("smoke.fixtures", "workspace/test-min/elements"));
+		File fixtures = new File(System.getProperty("smoke.fixtures", "tools/fixtures/test-min/elements"));
 		addElement(workspace, "TestBlock", ModElementType.BLOCK, "test_block", fixtures);
 		addElement(workspace, "TestItem", ModElementType.ITEM, "test_item", fixtures);
 		addElement(workspace, "TestProcedure", ModElementType.PROCEDURE, "test_procedure", fixtures);

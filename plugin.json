@@ -4,7 +4,7 @@
   "supportedversions": [202600344621, 202600399999],
   "info": {
     "name": "Minecraft Fabric 1.21.8 Generator",
-    "version": "2026.3-1.0.1-beta",
+    "version": "2026.3-1.0.2.1-beta",
     "description": "Fabric generator for Minecraft 1.21.8, targeting MCreator 2026.3.",
     "author": "LitQA",
     "credits": "Generator architecture based on the MCreator NeoForge 1.21.8 generator; Fabric implementation derived from the Fabric-Generator-MCreator project by Goldorion, NerdyPuzzle and Spectrall.",

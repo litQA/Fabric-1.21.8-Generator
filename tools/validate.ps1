@@ -1,10 +1,14 @@
 # Compiles and runs the static generator validator against the shipped resources.
 # Requires the MCreator EAP installation (for the JDK and the Freemarker / SnakeYAML libraries).
 param(
-    [string]$MCreatorPath = 'B:\QA\Documents\App\Mods\DSH\Fabric_Generator_1.21.8\MCreatorEAP2026344621'
+    [string]$MCreatorPath = $env:MCREATOR_PATH
 )
 
 $ErrorActionPreference = 'Stop'
+
+if ([string]::IsNullOrWhiteSpace($MCreatorPath)) {
+    throw 'MCreator installation path is required. Pass -MCreatorPath or set MCREATOR_PATH.'
+}
 
 $pluginRoot = Split-Path -Parent $PSScriptRoot
 $javac = Join-Path $MCreatorPath 'jdk/bin/javac.exe'
