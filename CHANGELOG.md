@@ -13,6 +13,8 @@
   self-contained.
 - Documentation examples use placeholders instead of drive-letter paths, and the obsolete pre-2026.3 delivery
   document is marked as superseded.
+- Validation notes and changelog entries describe only generic test workspaces; private workspace names, mod ids,
+  element counts and machine paths are not recorded.
 - Version metadata moved to the four-part `2026.3-1.0.2.1-beta` format.
 
 ### Fixes
@@ -71,10 +73,10 @@ block/item/procedure workspace (code generation, compilation and client start).
 - Generator definitions migrated to the 2026.3 base type, `types` map, `field_exclusions` and fragment semantics.
 - Added an offline smoke test that drives the real MCreator 2026.3 plugin loader and template engine to verify plugin loading, workspace creation and code generation without the GUI.
 - Minimal block/item/procedure workspace verified on MCreator EAP 2026344621: generated code compiles and the Fabric 1.21.8 client starts.
-- Offline audit of three real 1.21.8 workspaces (334, 181 and 430 elements): 945 of 945 elements and all base templates render without template errors.
+- Offline audit of multiple test workspaces: all elements and all base templates render without template errors.
 - `types` conditions in base templates converted from the removed `base:<plural>` keys to `base_<plural>` with `?has_content` checks.
 - Definition conditions use the 2026.3 plural element lists where applicable.
-- Workspace base updated to Fabric Loom 1.15.5, Fabric Loader 0.20.1, Fabric API 0.136.1+1.21.8 and the local Gradle 9.8.0 distribution.
+- Workspace base updated to Fabric Loom 1.15.5, Fabric Loader 0.20.1, Fabric API 0.136.1+1.21.8 and the public Gradle 9.8.0 distribution.
 - Item use animations and attribute modifier equipment slots now use the 2026.3 mapped element values.
 - Generator subversion bumped to force base regeneration of existing workspaces.
 - Private base layers moved to the `fabric-1.21.8-base/` namespace and the plugin weight lowered to 10, so installed 1.21.8 generator plugins can no longer merge or override each other's definitions, templates or workspace base files.
@@ -93,4 +95,4 @@ Fixed 7 bug(s).
 ### Known Limitations
 - Multipart block states, dimension skybox/sun/moon rendering, loot modifiers, synced data animation and layer conditions, rafts, advancement item predicates and 1.21.8 raytrace reset modes are not implemented.
 - Enchantment effect and value modifier features rely on the shared 2026.3 datapack template and were not runtime verified.
-- Compilation and client start were confirmed for the minimal block/item/procedure workspace. The three larger user workspaces (945 elements) pass the offline template audit, but their full code generation and Gradle builds are still under real-machine testing.
+- Compilation and client start were confirmed for the minimal block/item/procedure workspace. The larger test workspaces pass the offline template audit, but their full code generation and Gradle builds are still under real-machine testing.

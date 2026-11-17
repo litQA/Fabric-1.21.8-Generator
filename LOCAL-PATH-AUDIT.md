@@ -7,6 +7,7 @@
 - 排除项：`.git/`、`build/`、`.gradle/`、`caches/`、`Reference resources/`、生成物 `workspace/`
 - 结论（修复前）：**存在 3 处本地绝对路径（模板会阻断分发，插件 wrapper 会阻断换机构建，另一处为死配置），另有 3 处工具脚本默认/示例路径、1 处插件外 fixture 依赖、2 类文档示例和 1 项缓存重定向缺口。**
 - 修复状态：**已修复，版本 `2026.3-1.0.2.1-beta`**。本报告保留修复前证据用于追溯；修复记录见下节。
+- 脱敏更新：2026-11-17，移除测试工作区名称、mod id 和元素数量，仅保留“测试工作区”泛称。
 
 > 说明：检测到的真实盘符和用户目录已在本文中用 `<local-workspace>`、`<local-drive>`、`<user-home>` 脱敏；文件和行号均为修复前源码中的实际位置。
 
@@ -16,7 +17,7 @@
 - 删除 `plugin/gradle.properties` 中未被消费的 `gradle_distribution_url`。
 - 三个 workspacebase 的 `gradlew` / `gradlew.bat` 均把 `GRADLE_USER_HOME` 重定向到生成工程内的 `caches/gradle`（相对 `APP_HOME`，无绝对路径）。
 - `validate.ps1`、`smoke-test.ps1` 的 `MCreatorPath` 改为必填参数或 `MCREATOR_PATH` 环境变量，不再内置本机默认值。
-- 最小 fixture 移入 `plugin/tools/fixtures/test-min/elements`，`smoke-test.ps1` 不再依赖插件目录外的 `workspace/test-min`。
+- 最小 fixture 移入 `plugin/tools/fixtures/test-min/elements`，`smoke-test.ps1` 不再依赖插件目录外的测试工作区。
 - README、MIGRATION-REPORT、`开发与交付规范.md` 中的盘符示例和本地 URL 说明已替换为占位符/公共策略；旧规范已标记 `OBSOLETE`。
 - 三个 base 层与主 workspacebase 的 Gradle 版本统一为 `9.8.0`。
 
@@ -51,7 +52,7 @@ distributionUrl=file\:///<local-workspace>/Reference%20resources/gradle-9.8.0-bi
 - 这是 `workspacebase`，会被复制到每一个新生成的 Fabric 1.21.8 工程；
 - 用户机器上没有 `B:` 盘或没有该 `Reference resources` 目录时，`gradlew` 直接失败；
 - ZIP 中携带开发者本机绝对路径，违反“生成器模板不得写入本地路径”；
-- 当前 `workspace/test-min`、`test-p01`、`test-croparium`、`test-everrose`、`test-betterMelon` 的 wrapper 都已出现同一路径，证明该问题会向下游传播。
+- 当前多个测试工作区的 wrapper 都已出现同一路径，证明该问题会向下游传播。
 
 **结论**：**必须在发布前修复，且不能只修测试工作区，必须修模板。**
 
@@ -112,7 +113,7 @@ gradle_distribution_url=file\:///<local-workspace>/Reference%20resources/gradle-
 [string]$MCreatorPath = '<local-workspace>\MCreatorEAP2026344621'
 ```
 
-**影响**：同上；且 `smoke-test.ps1:67` 还依赖插件目录之外的 `workspace/test-min/elements`（见 4.3）。
+**影响**：同上；且 `smoke-test.ps1:67` 还依赖插件目录之外的测试工作区 fixture（见 4.3）。
 
 ### 3.3 `verify-workspace.ps1` 使用示例
 
@@ -147,8 +148,8 @@ gradle_distribution_url=file\:///<local-workspace>/Reference%20resources/gradle-
 
 **运行时证据**：
 
-- `workspace/test-min/.mcreator/generatorGradleCache:1` 使用 MCreator 安装目录的 JDK；
-- `workspace/test-min/run/logs/debug.log:106` 等行显示 Loom/Gradle 类路径来自 `<user-home>\.mcreator\gradle`，而不是 `workspace/test-min/caches`。
+- `测试工作区/.mcreator/generatorGradleCache:1` 使用 MCreator 安装目录的 JDK；
+- `测试工作区/run/logs/debug.log:106` 等行显示 Loom/Gradle 类路径来自 `<user-home>\.mcreator\gradle`，而不是 `测试工作区/caches`。
 
 **结论**：这不是“硬编码为某个盘符”的路径，但**违反了新规范的缓存强制重定向要求**；生成工程必须在 wrapper 脚本或 MCreator 生成流程中显式设置 `GRADLE_USER_HOME`/`-g` 到 `<workspace>/caches/gradle`。
 
@@ -172,7 +173,7 @@ gradle_distribution_url=file\:///<local-workspace>/Reference%20resources/gradle-
 **文件**：`plugin/tools/smoke-test.ps1:67`
 
 ```powershell
-"-Dsmoke.fixtures=$repoRoot\workspace\test-min\elements"
+"-Dsmoke.fixtures=$repoRoot\workspace\<test-workspace>\elements"
 ```
 
 **影响**：
@@ -320,7 +321,7 @@ Get-ChildItem .\caches
 - `validate.ps1`：172 个 YAML、1754 个 Freemarker 模板、653 个模板引用、889 个 include，全部通过。
 - `smoke-test.ps1`（隔离加载打包 ZIP）：插件加载成功、无失败插件、37 个 definition、44 个 base template、35 个 element 文件，`SMOKE TEST PASSED`。
 - 打包 ZIP 扫描：`generator.yaml` 恰好 1 个；`file:///` 与盘符路径匹配 0 处；三个 `gradle-wrapper.properties` 均为公共 9.8.0 地址；三组 `gradlew` / `gradlew.bat` 均包含 `GRADLE_USER_HOME`。
-- `workspace/test-min`、`test-p01`、`test-croparium`、`test-everrose`、`test-betterMelon` 的 wrapper 已刷新为公共地址与工程内缓存。
+- 多个测试工作区的 wrapper 已刷新为公共地址与工程内缓存。
 - 源码/文档全量扫描后，除本报告为追溯而保留的脱敏历史描述外，未再发现本地绝对路径。
 
 **本轮只做审计，未修改源码。** 上述 P0 项建议在下次构建/发布前处理。

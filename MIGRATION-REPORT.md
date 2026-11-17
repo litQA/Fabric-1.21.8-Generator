@@ -250,7 +250,7 @@ is not applied in the generated files; MCreator applies it during a real workspa
 
 ### 7.2 Real-machine verification (user-confirmed)
 
-The minimal workspace `workspace/test-min` (one block, one item and one procedure) was installed on the target
+The minimal test workspace (one block, one item and one procedure) was installed on the target
 MCreator EAP 2026344621 and tested by the user. The reported result:
 
 - the generated workspace compiles;
@@ -260,17 +260,14 @@ This confirms end-to-end loading, workspace setup, code generation and compilati
 including the `types.base_*` registration fix, the villager trade model change and the 2026.3 item/animation
 mapping.
 
-An additional offline audit loaded the three larger user test workspaces through the same MCreator 2026.3
-classes and rendered every element in memory:
+An additional offline audit loaded multiple test workspaces through the same MCreator 2026.3 classes and rendered
+every element in memory:
 
-| Workspace | Elements | Base templates | Result |
-| --- | --- | --- | --- |
-| `test-croparium` (`cp_lib`) | 334 | 36 | all render |
-| `test-everrose` (`everrose`) | 181 | 33 | all render |
-| `test-betterMelon` (`qa_better_melon`) | 430 | 43 | all render |
-| **Total** | **945** | - | **945/945 elements, 2947 files, 0 template failures** |
+| Workspace | Result |
+| --- | --- |
+| Test workspaces | All elements render without template errors |
 
-The audit found one missing trigger template (`player_useitem_finish`) used by the better melon workspace. The
+The audit found one missing trigger template (`player_useitem_finish`) used by one test workspace. The
 trigger was implemented with a new `FINISH_USING_ITEM` Fabric event and a `completeUsingItem` mixin injection,
 and the player stop using item trigger's `itemstack` dependency typo was fixed at the same time. After the fix
 the audit reports zero failures. Full code generation and Gradle builds of these workspaces are still under
@@ -296,7 +293,7 @@ semantics, the YAML base type sources or the YAML merge behaviour:
   before the marker checks.
 
 Both fixes only affect emitted Java expressions; the definitions, base types and YAML merge results were already
-loading correctly (the 945-element audit found no definition or template resolution errors).
+loading correctly (the multi-workspace audit found no definition or template resolution errors).
 
 ### 7.4 Static checks
 
@@ -346,8 +343,8 @@ separation. The fake plugin uses `weight: 12` (higher than this plugin), ships `
   model template;
 - all base templates still render (18 in the coexistence run).
 
-The 945-element audit was also repeated with the namespaced package: 945/945 elements, 2947 files, no template,
-`UseAnim` or wrapped `ItemStack` errors.
+The multi-workspace audit was also repeated with the namespaced package: all elements and files render with no
+template, `UseAnim` or wrapped `ItemStack` errors.
 
 ## 8. Known limitations
 
